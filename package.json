@@ -1,0 +1,16 @@
+{
+  "name": "style",
+  "version": "1.0.0",
+  "main": "pdf_generator.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "papaparse": "^5.5.3",
+    "puppeteer": "^24.22.3"
+  }
+}
