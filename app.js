@@ -712,143 +712,732 @@ class PDFGenerator {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${data.fullName} - Portfolio</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; background: #ffffff; color: #1f2937; font-size: 18px; }
-  .hero { position: relative; width: 100%; min-height: 320px; background: radial-gradient(1200px 500px at 20% -40%, rgba(99,102,241,0.12), transparent 65%), radial-gradient(1000px 500px at 100% -20%, rgba(168,85,247,0.10), transparent 60%), linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); display: flex; align-items: center; }
-  .container { max-width: 1200px; margin: 0 auto; padding: 32px 32px; width: 100%; }
-  .hero-card { display: grid; grid-template-columns: 180px 1fr; gap: 28px; align-items: center; background: #ffffff; border: 1px solid rgba(2,6,23,0.06); border-radius: 28px; padding: 28px; box-shadow: 0 20px 50px rgba(2,6,23,0.06); }
-  .avatar { width: 200px; height: 200px; border-radius: 20px; overflow: hidden; background: linear-gradient(135deg, #6366f1, #8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 72px; font-weight: 900; color: white; box-shadow: 0 18px 40px rgba(99,102,241,0.35); border: 5px solid rgba(2,6,23,0.04); }
-  .avatar img { width: 100%; height: 100%; object-fit: cover; }
-  .title { display: flex; flex-direction: column; gap: 10px; }
-  .name { font-size: 48px; font-weight: 900; letter-spacing: -0.8px; color: #0f172a; }
-  .role { font-size: 22px; font-weight: 800; color: #374151; }
-  .meta { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 6px; }
-  .meta-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: #eef2ff; color: #3730a3; border: 1px solid rgba(55,48,163,0.15); font-weight: 700; font-size: 13px; }
-  .grid { display: grid; grid-template-columns: 1fr; gap: 28px; margin-top: 28px; }
-  .section { background: #ffffff; border: 1px solid rgba(2,6,23,0.06); border-radius: 24px; padding: 30px; box-shadow: 0 18px 45px rgba(2,6,23,0.06); }
-  .section-header { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
-  .badge { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; box-shadow: 0 10px 22px rgba(79,70,229,0.35); font-weight: 900; font-size: 20px; }
-  .section-title { font-size: 28px; font-weight: 900; color: #0f172a; letter-spacing: -0.4px; padding-bottom: 8px; box-shadow: inset 0 -3px 0 0 rgba(79,70,229,0.25); }
-  .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
-  .card { background: #ffffff; border: 1px solid rgba(2,6,23,0.06); border-radius: 18px; padding: 20px; box-shadow: 0 10px 24px rgba(2,6,23,0.06); transition: transform .2s ease, box-shadow .2s ease; }
-  .card:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(2,6,23,0.55); }
-  .label { font-size: 16px; text-transform: uppercase; letter-spacing: 1.2px; color: #4f46e5; font-weight: 900; margin-bottom: 10px; }
-  .value { font-size: 20px; color: #111827; font-weight: 700; line-height: 1.75; }
-  .value.muted { color: #4b5563; font-weight: 600; }
-  .stack { display: grid; gap: 16px; }
-  .quote { position: relative; padding: 20px; border-radius: 16px; background: #eef2ff; border-left: 4px solid #4f46e5; color: #1f2937; font-style: italic; font-size: 18px; }
-  .experience { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-  .xp { padding: 18px; border-radius: 14px; background: #f3f4f6; border-left: 4px solid #4f46e5; color: #1f2937; font-size: 18px; font-weight: 700; }
-  .company-hero { display: flex; align-items: center; gap: 20px; padding: 20px; border-radius: 18px; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border: 1px solid rgba(2,6,23,0.06); box-shadow: 0 12px 30px rgba(2,6,23,0.06); }
-  .company-logo { width: 110px; height: 110px; border-radius: 14px; background: white; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-  .company-logo img { width: 100%; height: 100%; object-fit: contain; }
-  .company-name { font-size: 30px; font-weight: 900; color: #0f172a; }
-  .company-tag { font-size: 18px; color: #4b5563; }
-  .list { display: grid; gap: 10px; }
-  .list li { list-style: none; padding-left: 18px; position: relative; color: #111827; }
-  .list li::before { content: ''; position: absolute; left: 0; top: 9px; width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(135deg, #4f46e5, #7c3aed); box-shadow: 0 0 0 2px rgba(79,70,229,0.2); }
-  @media (max-width: 1024px) { .cards { grid-template-columns: 1fr 1fr; } .experience { grid-template-columns: 1fr; } .hero-card { grid-template-columns: 1fr; } }
-  @media (max-width: 640px) { .cards { grid-template-columns: 1fr; } .container { padding: 20px 16px; } .avatar { width: 140px; height: 140px; font-size: 52px; } .name { font-size: 34px; } .role { font-size: 18px; } .section { padding: 22px; } }
-</style>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>${data.fullName} - Portfolio Profile</title>
+
+	<!-- Google Fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+	<style>
+		:root {
+			--bg: #f7f8fc;
+			--card: #ffffff;
+			--text: #0f172a;
+			--muted: #64748b;
+			--primary: #6366f1;
+			--primary-600: #4f46e5;
+			--accent: #a78bfa;
+			--blue: #60a5fa;
+			--ring: rgba(99, 102, 241, 0.35);
+			--border: #e5e7eb;
+			--shadow: 0 10px 30px rgba(2, 6, 23, 0.08), 0 2px 8px rgba(2, 6, 23, 0.04);
+			--radius-lg: 16px;
+			--radius-md: 14px;
+			--radius-sm: 12px;
+			--space: 22px;
+			--space-lg: 28px;
+			--space-xl: 44px;
+			--maxw: 1100px;
+		}
+
+		* { box-sizing: border-box; }
+
+		html, body {
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji, "Poppins", sans-serif;
+			color: var(--text);
+			background:
+				radial-gradient(1200px 700px at 10% -10%, rgba(99,102,241,0.12), rgba(99,102,241,0) 40%),
+				radial-gradient(900px 600px at 110% 10%, rgba(96,165,250,0.12), rgba(96,165,250,0) 40%),
+				radial-gradient(900px 700px at -10% 100%, rgba(167,139,250,0.12), rgba(167,139,250,0) 40%),
+				var(--bg);
+			line-height: 1.55;
+		}
+
+		a { color: var(--primary-600); text-decoration: none; }
+		a:hover { text-decoration: underline; }
+
+		.container {
+			max-width: var(--maxw);
+			margin: 0 auto;
+			padding: 28px 20px 64px;
+		}
+
+		/* Hero Card */
+		.hero {
+			position: relative;
+			background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0.95));
+			backdrop-filter: saturate(180%) blur(10px);
+			border: 1px solid var(--border);
+			border-radius: 24px;
+			padding: 48px;
+			box-shadow: var(--shadow);
+			overflow: hidden;
+			margin-bottom: 40px;
+		}
+		.hero:before {
+			content: "";
+			position: absolute;
+			inset: -1px;
+			border-radius: 22px;
+			background:
+				radial-gradient(800px 240px at 50% -10%, rgba(99, 102, 241, 0.15), transparent 40%),
+				radial-gradient(600px 240px at 10% 20%, rgba(96, 165, 250, 0.12), transparent 50%),
+				radial-gradient(700px 240px at 90% 30%, rgba(167, 139, 250, 0.12), transparent 45%);
+			pointer-events: none;
+			z-index: 0;
+		}
+		.hero-inner {
+			position: relative;
+			z-index: 1;
+			display: grid;
+			grid-template-columns: 180px 1fr;
+			gap: 32px;
+			align-items: center;
+		}
+		@media (max-width: 640px) {
+			.hero-inner {
+				grid-template-columns: 1fr;
+				text-align: center;
+				gap: 20px;
+			}
+		}
+		.avatar {
+			width: 180px;
+			height: 180px;
+			border-radius: 24px;
+			overflow: hidden;
+			border: 1px solid var(--border);
+			box-shadow: 0 12px 30px rgba(2, 6, 23, 0.15);
+			background: linear-gradient(135deg, #6366f1, #8b5cf6);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 72px;
+			font-weight: 900;
+			color: white;
+		}
+		.avatar img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			display: block;
+		}
+		.hero-meta h1 {
+			font-family: Poppins, Inter, sans-serif;
+			font-weight: 800;
+			letter-spacing: -0.5px;
+			margin: 0 0 10px 0;
+			font-size: clamp(32px, 5vw, 48px);
+		}
+		.hero-meta .role {
+			color: var(--muted);
+			font-weight: 600;
+			margin-bottom: 16px;
+			font-size: 18px;
+		}
+		.hero-actions {
+			display: flex;
+			gap: 10px;
+			flex-wrap: wrap;
+			margin-top: 4px;
+		}
+		.pill {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			padding: 6px 10px;
+			border-radius: 999px;
+			background: #f3f6ff;
+			color: #27357a;
+			border: 1px solid #e6eaff;
+			font-weight: 600;
+			font-size: 12px;
+		}
+
+		/* Section heading */
+		.section-title {
+			display: flex;
+			align-items: center;
+			gap: 14px;
+			margin: 32px 0 20px;
+			font-family: Poppins, Inter, sans-serif;
+			font-weight: 800;
+			letter-spacing: -0.3px;
+			font-size: 28px;
+			color: var(--text);
+		}
+		.section-title .bar {
+			width: 32px;
+			height: 10px;
+			border-radius: 8px;
+			background: linear-gradient(90deg, var(--primary), var(--accent), var(--blue));
+			box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
+			animation: pulse-bar 2s ease-in-out infinite;
+		}
+		@keyframes pulse-bar {
+			0%, 100% { transform: scaleX(1); opacity: 1; }
+			50% { transform: scaleX(1.1); opacity: 0.8; }
+		}
+
+		/* Card grid */
+		.grid {
+			display: grid;
+			grid-template-columns: 1fr;
+			gap: 18px;
+		}
+
+		.card {
+			background: var(--card);
+			border: 1px solid var(--border);
+			border-radius: var(--radius-lg);
+			padding: var(--space-lg);
+			box-shadow: var(--shadow);
+			transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+			will-change: transform;
+			position: relative;
+			overflow: hidden;
+		}
+		.card::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 3px;
+			background: linear-gradient(90deg, var(--primary), var(--accent), var(--blue));
+			opacity: 0;
+			transition: opacity .3s ease;
+		}
+		.card:hover {
+			transform: translateY(-6px);
+			box-shadow: 0 20px 50px rgba(99, 102, 241, 0.18), 0 8px 20px rgba(99, 102, 241, 0.08);
+			border-color: rgba(99, 102, 241, 0.3);
+		}
+		.card:hover::before {
+			opacity: 1;
+		}
+
+		.card .card-headline {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			margin: 0 0 20px 0;
+			font-weight: 800;
+			font-size: 20px;
+			font-family: Poppins, Inter, sans-serif;
+			color: var(--text);
+			padding-bottom: 12px;
+			border-bottom: 2px solid #f1f5f9;
+		}
+		.card .card-headline .icon {
+			width: 24px;
+			height: 24px;
+			color: var(--primary-600);
+			flex: 0 0 24px;
+			font-size: 24px;
+			filter: drop-shadow(0 2px 4px rgba(99, 102, 241, 0.2));
+		}
+
+		/* Content styling inside cards */
+		.card :where(h1, h2, h3, h4) { margin: 14px 0 8px; font-weight: 700; }
+		.card :where(h1, h2) { font-size: 18px; }
+		.card :where(h3, h4) { font-size: 16px; }
+		.card p { margin: 8px 0; color: var(--text); }
+		.card .muted, .card small, .card .subtle { color: var(--muted); }
+
+		.card ul, .card ol {
+			margin: 10px 0 10px 20px;
+			padding: 0;
+		}
+		.card li { margin: 6px 0; }
+
+		.card a {
+			color: var(--primary-600);
+			font-weight: 600;
+			text-decoration: none;
+			border-bottom: 1px dashed rgba(79,70,229,0.35);
+			transition: color .2s ease, border-color .2s ease, background .2s ease;
+			border-radius: 6px;
+			padding: 2px 4px;
+		}
+		.card a:hover {
+			color: #1f2a63;
+			background: rgba(79,70,229,0.06);
+			border-color: transparent;
+			text-decoration: none;
+		}
+
+		/* Key-value rows */
+		.kv {
+			display: grid;
+			grid-template-columns: 180px 1fr;
+			gap: 6px 14px;
+			margin-top: 20px;
+		}
+		@media (max-width: 640px) {
+			.kv { grid-template-columns: 1fr; }
+		}
+		.kv .k { color: var(--muted); font-weight: 600; font-size: 14px; }
+		.kv .v { color: var(--text); font-size: 14px; word-break: break-word; }
+
+		/* Experience blocks */
+		.experience-grid {
+			display: grid;
+			gap: 14px;
+			margin-top: 16px;
+		}
+		.xp {
+			padding: 18px;
+			border-radius: 14px;
+			background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+			border-left: 5px solid var(--primary);
+			font-size: 14px;
+			line-height: 1.7;
+			box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08);
+			transition: transform .3s ease, box-shadow .3s ease, border-left-width .3s ease;
+			position: relative;
+			overflow: hidden;
+		}
+		.xp::after {
+			content: '';
+			position: absolute;
+			right: 10px;
+			top: 10px;
+			width: 40px;
+			height: 40px;
+			background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+			border-radius: 50%;
+		}
+		.xp:hover {
+			transform: translateX(4px);
+			box-shadow: 0 8px 20px rgba(99, 102, 241, 0.15);
+			border-left-width: 8px;
+		}
+		.xp.current {
+			border-left-color: #10b981;
+			background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+			box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
+		}
+		.xp.current::after {
+			background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+		}
+		.xp.current:hover {
+			box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
+		}
+		.xp-label {
+			font-size: 12px;
+			font-weight: 800;
+			color: var(--primary);
+			text-transform: uppercase;
+			letter-spacing: 1px;
+			margin-bottom: 8px;
+			display: flex;
+			align-items: center;
+			gap: 6px;
+		}
+		.xp-label::before {
+			content: '💼';
+			font-size: 14px;
+		}
+		.xp.current .xp-label { color: #10b981; }
+		.xp.current .xp-label::before { content: '⭐'; }
+
+		/* Posts */
+		.posts-grid {
+			display: grid;
+			gap: 14px;
+			margin-top: 16px;
+		}
+		.post {
+			padding: 18px;
+			border-radius: 14px;
+			background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+			border-left: 5px solid #10b981;
+			font-size: 14px;
+			line-height: 1.7;
+			font-style: italic;
+			color: #065f46;
+			box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+			transition: transform .3s ease, box-shadow .3s ease;
+			position: relative;
+			overflow: hidden;
+		}
+		.post::before {
+			content: '💬';
+			position: absolute;
+			top: 12px;
+			right: 12px;
+			font-size: 28px;
+			opacity: 0.15;
+		}
+		.post:hover {
+			transform: translateX(4px);
+			box-shadow: 0 8px 20px rgba(16, 185, 129, 0.18);
+		}
+		.post-label {
+			font-size: 11px;
+			font-weight: 800;
+			color: #10b981;
+			text-transform: uppercase;
+			letter-spacing: 1px;
+			margin-bottom: 8px;
+			display: block;
+			font-style: normal;
+		}
+
+		/* Company section */
+		.company-header {
+			display: flex;
+			align-items: center;
+			gap: 18px;
+			padding: 22px;
+			border-radius: 16px;
+			background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+			border: 1px solid var(--border);
+			margin-bottom: 20px;
+			box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08);
+			transition: transform .3s ease, box-shadow .3s ease;
+		}
+		.company-header:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 20px rgba(99, 102, 241, 0.12);
+		}
+		.company-logo-box {
+			width: 70px;
+			height: 70px;
+			border-radius: 12px;
+			background: white;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			overflow: hidden;
+			border: 1px solid var(--border);
+			flex-shrink: 0;
+		}
+		.company-logo-box img {
+			width: 100%;
+			height: 100%;
+			object-fit: contain;
+		}
+		.company-logo-placeholder {
+			font-weight: 900;
+			color: var(--primary);
+			font-size: 28px;
+		}
+		.company-name {
+			font-size: 22px;
+			font-weight: 800;
+			color: var(--text);
+			margin-bottom: 4px;
+		}
+		.company-tagline {
+			font-size: 13px;
+			color: var(--muted);
+		}
+
+		.list {
+			list-style: none;
+			padding: 0;
+			margin: 8px 0;
+		}
+		.list li {
+			position: relative;
+			padding-left: 20px;
+			margin-bottom: 6px;
+			font-size: 14px;
+			color: #475569;
+			line-height: 1.6;
+		}
+		.list li::before {
+			content: '';
+			position: absolute;
+			left: 0;
+			top: 8px;
+			width: 6px;
+			height: 6px;
+			border-radius: 50%;
+			background: linear-gradient(135deg, var(--primary), var(--accent));
+			box-shadow: 0 0 0 2px rgba(99,102,241,0.2);
+		}
+
+		/* About Section */
+		.about-section {
+			padding: 20px;
+			border-radius: 14px;
+			background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+			border-left: 5px solid #0ea5e9;
+			margin-top: 16px;
+			box-shadow: 0 4px 12px rgba(14, 165, 233, 0.1);
+			transition: transform .3s ease, box-shadow .3s ease;
+		}
+		.about-section:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 20px rgba(14, 165, 233, 0.15);
+		}
+		.about-section strong {
+			font-size: 16px;
+			font-weight: 800;
+			color: #0c4a6e;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			margin-bottom: 12px;
+			font-family: Poppins, Inter, sans-serif;
+		}
+		.about-section strong::before {
+			content: 'ℹ️';
+			font-size: 20px;
+		}
+		.about-section p {
+			font-size: 15px;
+			line-height: 1.8;
+			color: #164e63;
+			margin: 0;
+		}
+
+		/* Recent Events */
+		.events-section {
+			padding: 20px;
+			border-radius: 14px;
+			background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+			border-left: 5px solid #f59e0b;
+			margin-top: 16px;
+			box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);
+			transition: transform .3s ease, box-shadow .3s ease;
+			position: relative;
+			overflow: hidden;
+		}
+		.events-section::after {
+			content: '📅';
+			position: absolute;
+			top: 15px;
+			right: 15px;
+			font-size: 32px;
+			opacity: 0.2;
+		}
+		.events-section:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 20px rgba(245, 158, 11, 0.18);
+		}
+		.events-section strong {
+			font-size: 16px;
+			font-weight: 800;
+			color: #92400e;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			margin-bottom: 12px;
+			font-family: Poppins, Inter, sans-serif;
+		}
+		.events-section strong::before {
+			content: '🎯';
+			font-size: 20px;
+		}
+		.events-section p {
+			font-size: 15px;
+			line-height: 1.8;
+			color: #78350f;
+			margin: 0;
+			font-weight: 600;
+		}
+
+		/* Brief Section */
+		.brief-section {
+			padding: 18px;
+			border-radius: 14px;
+			background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+			border-left: 5px solid #a855f7;
+			margin-top: 16px;
+			box-shadow: 0 4px 12px rgba(168, 85, 247, 0.1);
+			transition: transform .3s ease, box-shadow .3s ease;
+		}
+		.brief-section:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 20px rgba(168, 85, 247, 0.15);
+		}
+		.brief-section strong {
+			font-size: 15px;
+			font-weight: 800;
+			color: #6b21a8;
+			display: block;
+			margin-bottom: 10px;
+			font-family: Poppins, Inter, sans-serif;
+		}
+		.brief-section p {
+			font-size: 14px;
+			line-height: 1.7;
+			color: #581c87;
+			margin: 0;
+		}
+
+		/* Footer */
+		.footer {
+			margin-top: 28px;
+			display: flex;
+			justify-content: center;
+			color: var(--muted);
+			font-size: 13px;
+		}
+	</style>
 </head>
 <body>
-  <header class="hero">
-    <div class="container">
-      <div class="hero-card">
-        <div class="avatar">
-          ${data.contactPhotoUrl ? `<img src="${data.contactPhotoUrl}" alt="${data.fullName}" onerror="this.parentElement.textContent='${initials}'">` : `${initials}`}
-        </div>
-        <div class="title">
-          <div class="name">${data.fullName}</div>
-          ${this.hasValue(data.title) ? `<div class="role">${data.title}</div>` : ''}
-          <div class="meta">
-            ${this.hasValue(data.personState, data.personCountry) ? `<span class="meta-chip">📍 ${[data.personState, data.personCountry].filter(Boolean).join(', ')}</span>` : ''}
-            ${this.hasValue(data.education) ? `<span class="meta-chip">🎓 ${data.education}</span>` : ''}
-          </div>
-        </div>
-      </div>
-    </div>
-  </header>
+	<div class="container">
+		<!-- HERO -->
+		<section class="hero">
+			<div class="hero-inner">
+				<div class="avatar">
+					${data.contactPhotoUrl ? `<img src="${data.contactPhotoUrl}" alt="${data.fullName}" onerror="this.parentElement.textContent='${initials}'">` : `${initials}`}
+				</div>
+				<div class="hero-meta">
+					<h1>${data.fullName}</h1>
+					${this.hasValue(data.title) ? `<div class="role">${data.title}</div>` : ''}
+					<div class="hero-actions">
+						${this.hasValue(data.personState, data.personCountry) ? `<span class="pill">📍 ${[data.personState, data.personCountry].filter(Boolean).join(', ')}</span>` : ''}
+						${this.hasValue(data.education) ? `<span class="pill">🎓 ${data.education}</span>` : ''}
+					</div>
+				</div>
+			</div>
+		</section>
 
-  <main class="container">
-    <div class="grid">
-      <section class="section">
-        <div class="section-header">
-          <div class="badge">👤</div>
-          <h2 class="section-title">User Information</h2>
-        </div>
-        <div class="stack">
-          ${this.hasValue(data.summary) ? `<div class="quote">${data.summary}</div>` : ''}
-          <div class="cards">
-            ${this.hasValue(data.headline) ? `<div class="card"><div class="label">Headline</div><div class="value">${data.headline}</div></div>` : ''}
-            ${this.hasValue(data.personContactEmail) ? `<div class="card"><div class="label">Email</div><div class="value">${data.personContactEmail}</div></div>` : ''}
-            ${this.hasValue(data.contactPhone) ? `<div class="card"><div class="label">Primary Phone</div><div class="value">${data.contactPhone}</div></div>` : ''}
-            ${this.hasValue(data.contactSecondPhone) ? `<div class="card"><div class="label">Secondary Phone</div><div class="value">${data.contactSecondPhone}</div></div>` : ''}
-            ${this.hasValue(data.contactLinkedIn) ? `<div class="card"><div class="label">LinkedIn</div><div class="value"><a href="${data.contactLinkedIn}" style="color:#a5b4fc;text-decoration:none;">${data.contactLinkedIn}</a></div></div>` : ''}
-          </div>
-          ${this.hasValue(data.currentExperience, data.experience2, data.experience3, data.experience4) ? `
-          <div class="experience">
-            ${this.hasValue(data.currentExperience) ? `<div class="xp"><span style="font-weight:800;color:#c7d2fe;">Current</span><br>${data.currentExperience}</div>` : ''}
-            ${this.hasValue(data.experience2) ? `<div class="xp">${data.experience2}</div>` : ''}
-            ${this.hasValue(data.experience3) ? `<div class="xp">${data.experience3}</div>` : ''}
-            ${this.hasValue(data.experience4) ? `<div class="xp">${data.experience4}</div>` : ''}
-          </div>
-          ` : ''}
-          ${this.hasValue(data.lastPostPerson1, data.lastPostPerson2, data.lastPostPerson3) ? `
-          <div class="cards" style="grid-template-columns:1fr;">
-            ${this.hasValue(data.lastPostPerson1) ? `<div class="card"><div class="label">Recent Post 1</div><div class="value muted">${data.lastPostPerson1}</div></div>` : ''}
-            ${this.hasValue(data.lastPostPerson2) ? `<div class="card"><div class="label">Recent Post 2</div><div class="value muted">${data.lastPostPerson2}</div></div>` : ''}
-            ${this.hasValue(data.lastPostPerson3) ? `<div class="card"><div class="label">Recent Post 3</div><div class="value muted">${data.lastPostPerson3}</div></div>` : ''}
-          </div>
-          ` : ''}
-        </div>
-      </section>
+		<!-- USER INFORMATION SECTION -->
+		<div class="section-title"><span class="bar"></span><span>User Information</span></div>
 
-      ${hasCompanyInfo ? `
-      <section class="section">
-        <div class="section-header">
-          <div class="badge">🏢</div>
-          <h2 class="section-title">Company Information</h2>
-        </div>
-        <div class="stack">
-          ${(this.hasValue(data.companyName) || this.hasValue(data.companyLogoUrl) || this.hasValue(data.companyTagline)) ? `
-          <div class="company-hero">
-            <div class="company-logo">
-              ${this.hasValue(data.companyLogoUrl) ? `<img src="${data.companyLogoUrl}" alt="${data.companyName}">` : `<span style=\"font-weight:900;color:#6366f1;font-size:24px\">${(data.companyName||'?').charAt(0).toUpperCase()}</span>`}
-            </div>
-            <div>
-              ${this.hasValue(data.companyName) ? `<div class="company-name">${data.companyName}</div>` : ''}
-              ${this.hasValue(data.companyTagline) ? `<div class="company-tag">${data.companyTagline}</div>` : ''}
-            </div>
-          </div>
-          ` : ''}
-          <div class="cards">
-            ${this.hasValue(data.companyWebsite) ? `<div class="card"><div class="label">Website</div><div class="value"><a href="${data.companyWebsite}" style="color:#a5b4fc;text-decoration:none;">${data.companyWebsite}</a></div></div>` : ''}
-            ${this.hasValue(data.contactCorporatePhone) ? `<div class="card"><div class="label">Corporate Phone</div><div class="value">${data.contactCorporatePhone}</div></div>` : ''}
-            ${this.hasValue(data.companyIndustry) ? `<div class="card"><div class="label">Industry</div><div class="value">${data.companyIndustry}</div></div>` : ''}
-          </div>
-          ${this.hasValue(data.companyAbout) ? `<div class="card"><div class="label">About</div><div class="value muted">${data.companyAbout}</div></div>` : ''}
-          ${this.hasValue(data.companyWebsiteBrief) ? `<div class="card"><div class="label">Brief</div><div class="value muted">${data.companyWebsiteBrief}</div></div>` : ''}
-          ${this.hasValue(data.companyAddress) ? `<div class="card"><div class="label">Address</div><div class="value">${data.companyAddress}</div></div>` : ''}
-          ${this.hasValue(data.companyPartners) ? `<div class="card"><div class="label">Partners</div><ul class="list">${data.companyPartners.split(';').map(p => `<li>${p.trim()}</li>`).join('')}</ul></div>` : ''}
-          ${this.hasValue(data.companyLastEvents) ? `<div class="card"><div class="label">Recent Events</div><div class="value muted">${data.companyLastEvents}</div></div>` : ''}
-          ${this.hasValue(data.companyLastPost1, data.companyLastPost2, data.companyLastPost3) ? `
-          <div class="cards" style="grid-template-columns:1fr;">
-            ${this.hasValue(data.companyLastPost1) ? `<div class="card"><div class="label">Company Post 1</div><div class="value muted">${data.companyLastPost1}</div></div>` : ''}
-            ${this.hasValue(data.companyLastPost2) ? `<div class="card"><div class="label">Company Post 2</div><div class="value muted">${data.companyLastPost2}</div></div>` : ''}
-            ${this.hasValue(data.companyLastPost3) ? `<div class="card"><div class="label">Company Post 3</div><div class="value muted">${data.companyLastPost3}</div></div>` : ''}
-          </div>
-          ` : ''}
-        </div>
-      </section>
-      ` : ''}
-    </div>
-  </main>
+		<div class="grid">
+			<section class="card">
+				<div class="card-headline">
+					<span class="icon">👤</span>
+					User Profile
+				</div>
+
+				${this.hasValue(data.summary) ? `
+				<div class="about-section">
+					<strong>Professional Summary</strong>
+					<p>${data.summary}</p>
+				</div>
+				` : ''}
+				
+				${this.hasValue(data.headline) ? `
+				<div class="brief-section">
+					<strong>Professional Headline</strong>
+					<p>${data.headline}</p>
+				</div>
+				` : ''}
+
+				<div class="kv">
+					${this.hasValue(data.personContactEmail) ? `<div class="k">Email</div><div class="v"><a href="mailto:${data.personContactEmail}">${data.personContactEmail}</a></div>` : ''}
+					${this.hasValue(data.contactPhone) ? `<div class="k">Phone</div><div class="v"><a href="tel:${data.contactPhone}">${data.contactPhone}</a></div>` : ''}
+					${this.hasValue(data.contactSecondPhone) ? `<div class="k">Second Phone</div><div class="v"><a href="tel:${data.contactSecondPhone}">${data.contactSecondPhone}</a></div>` : ''}
+					${this.hasValue(data.contactLinkedIn) ? `<div class="k">LinkedIn</div><div class="v"><a href="${data.contactLinkedIn}" target="_blank" rel="noopener">View Profile</a></div>` : ''}
+				</div>
+
+				${this.hasValue(data.currentExperience, data.experience2, data.experience3, data.experience4) ? `
+				<div class="experience-grid">
+					${this.hasValue(data.currentExperience) ? `<div class="xp current"><div class="xp-label">Current Experience</div>${data.currentExperience}</div>` : ''}
+					${this.hasValue(data.experience2) ? `<div class="xp"><div class="xp-label">Previous Experience</div>${data.experience2}</div>` : ''}
+					${this.hasValue(data.experience3) ? `<div class="xp"><div class="xp-label">Previous Experience</div>${data.experience3}</div>` : ''}
+					${this.hasValue(data.experience4) ? `<div class="xp"><div class="xp-label">Previous Experience</div>${data.experience4}</div>` : ''}
+				</div>
+				` : ''}
+
+				${this.hasValue(data.lastPostPerson1, data.lastPostPerson2, data.lastPostPerson3) ? `
+				<div style="margin-top:20px;">
+					<strong style="font-size:16px;color:var(--text);font-family:Poppins,Inter,sans-serif;display:block;margin-bottom:4px;">LinkedIn Activity</strong>
+					<div class="posts-grid">
+						${this.hasValue(data.lastPostPerson1) ? `<div class="post"><span class="post-label">📌 LinkedIn Post #1</span>${data.lastPostPerson1}</div>` : ''}
+						${this.hasValue(data.lastPostPerson2) ? `<div class="post"><span class="post-label">📌 LinkedIn Post #2</span>${data.lastPostPerson2}</div>` : ''}
+						${this.hasValue(data.lastPostPerson3) ? `<div class="post"><span class="post-label">📌 LinkedIn Post #3</span>${data.lastPostPerson3}</div>` : ''}
+					</div>
+				</div>
+				` : ''}
+			</section>
+		</div>
+
+		<!-- COMPANY INFORMATION SECTION -->
+		${hasCompanyInfo ? `
+		<div class="section-title" style="margin-top:40px;"><span class="bar"></span><span>Company Information</span></div>
+
+		<div class="grid">
+			<section class="card">
+				<div class="card-headline">
+					<span class="icon">🏢</span>
+					Company Details
+				</div>
+
+				${(this.hasValue(data.companyName) || this.hasValue(data.companyLogoUrl) || this.hasValue(data.companyTagline)) ? `
+				<div class="company-header">
+					<div class="company-logo-box">
+						${this.hasValue(data.companyLogoUrl) ? `<img src="${data.companyLogoUrl}" alt="${data.companyName}">` : `<span class="company-logo-placeholder">${(data.companyName||'?').charAt(0).toUpperCase()}</span>`}
+					</div>
+					<div>
+						${this.hasValue(data.companyName) ? `<div class="company-name">${data.companyName}</div>` : ''}
+						${this.hasValue(data.companyTagline) ? `<div class="company-tagline">${data.companyTagline}</div>` : ''}
+					</div>
+				</div>
+				` : ''}
+
+				<div class="kv">
+					${this.hasValue(data.companyWebsite) ? `<div class="k">Website</div><div class="v"><a href="${data.companyWebsite}" target="_blank" rel="noopener">${data.companyWebsite}</a></div>` : ''}
+					${this.hasValue(data.companyIndustry) ? `<div class="k">Industry</div><div class="v">${data.companyIndustry}</div>` : ''}
+					${this.hasValue(data.contactCorporatePhone) ? `<div class="k">Phone</div><div class="v">${data.contactCorporatePhone}</div>` : ''}
+					${this.hasValue(data.companyAddress) ? `<div class="k">Address</div><div class="v">${data.companyAddress}</div>` : ''}
+					${this.hasValue(data.companyCity) ? `<div class="k">City</div><div class="v">${data.companyCity}</div>` : ''}
+					${this.hasValue(data.companyState) ? `<div class="k">State</div><div class="v">${data.companyState}</div>` : ''}
+					${this.hasValue(data.companyCountry) ? `<div class="k">Country</div><div class="v">${data.companyCountry}</div>` : ''}
+				</div>
+
+				${this.hasValue(data.companyAbout) ? `
+				<div class="about-section">
+					<strong>About the Company</strong>
+					<p>${data.companyAbout}</p>
+				</div>
+				` : ''}
+				${this.hasValue(data.companyWebsiteBrief) ? `
+				<div class="brief-section">
+					<strong>Company Brief</strong>
+					<p>${data.companyWebsiteBrief}</p>
+				</div>
+				` : ''}
+
+				${this.hasValue(data.companyPartners) ? `
+				<div style="margin-top:14px;">
+					<strong style="font-size:14px;color:var(--muted);">Partners</strong>
+					<ul class="list">
+						${data.companyPartners.split(';').map(p => `<li>${p.trim()}</li>`).join('')}
+					</ul>
+				</div>
+				` : ''}
+
+				${this.hasValue(data.companyLastEvents) ? `
+				<div class="events-section">
+					<strong>Recent Events</strong>
+					<p>${data.companyLastEvents}</p>
+				</div>
+				` : ''}
+
+				${this.hasValue(data.companyLastPost1, data.companyLastPost2, data.companyLastPost3) ? `
+				<div style="margin-top:20px;">
+					<strong style="font-size:16px;color:var(--text);font-family:Poppins,Inter,sans-serif;display:block;margin-bottom:4px;">Company LinkedIn Activity</strong>
+					<div class="posts-grid">
+						${this.hasValue(data.companyLastPost1) ? `<div class="post"><span class="post-label">🏢 Company LinkedIn Post #1</span>${data.companyLastPost1}</div>` : ''}
+						${this.hasValue(data.companyLastPost2) ? `<div class="post"><span class="post-label">🏢 Company LinkedIn Post #2</span>${data.companyLastPost2}</div>` : ''}
+						${this.hasValue(data.companyLastPost3) ? `<div class="post"><span class="post-label">🏢 Company LinkedIn Post #3</span>${data.companyLastPost3}</div>` : ''}
+					</div>
+				</div>
+				` : ''}
+			</section>
+		</div>
+		` : ''}
+
+		<div class="footer">Built with care — accessible, responsive, and elegant.</div>
+	</div>
 </body>
 </html>
       `;
