@@ -1,7 +1,7 @@
 {
   "name": "csv-to-pdf-generator",
   "version": "1.0.0",
-  "description": "A modern web application that generates professional profile PDFs from CSV data via API integration",
+  "description": "A modern web application that generates professional HTML profile pages from CSV or API data",
   "main": "pdf_generator.js",
   "scripts": {
     "generate": "node pdf_generator.js",
@@ -19,8 +19,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "papaparse": "^5.5.3",
-    "puppeteer": "^24.22.3"
+    "papaparse": "^5.5.3"
   },
   "repository": {
     "type": "git",

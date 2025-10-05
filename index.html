@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSV to PDF Generator</title>
+    <title>CSV to HTML Generator</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -834,8 +834,8 @@
     <nav class="navbar">
         <div class="navbar-container">
             <div class="logo">
-                <i class="fas fa-file-pdf"></i>
-                <span>PDF Gen</span>
+                <i class="fas fa-file-code"></i>
+                <span>HTML Gen</span>
             </div>
             <ul class="nav-menu">
                 <li><a href="#home">Home</a></li>
@@ -854,10 +854,10 @@
             </div>
             <h1>
                 Transform Your Data Into<br>
-                <span class="gradient-text">Beautiful PDFs</span>
+                <span class="gradient-text">Beautiful HTML Pages</span>
             </h1>
             <p>
-                Generate stunning, professional PDF documents from CSV data with just a few clicks. 
+                Generate stunning, professional HTML profile pages from CSV or API data with just a few clicks. 
                 Fast, reliable, and incredibly easy to use.
             </p>
             <div class="hero-buttons">
@@ -900,14 +900,14 @@
                 <div class="section-badge">
                     <i class="fas fa-magic"></i> Powerful Tools
                 </div>
-                <h2 class="section-title">Generate PDFs Effortlessly</h2>
+                <h2 class="section-title">Generate HTML Effortlessly</h2>
                 <p class="section-description">
                     Connect your data source and start generating professional PDFs in seconds
                 </p>
             </div>
             
             <div class="api-section">
-                <h2><i class="fas fa-link"></i> API Configuration</h2>
+                    <h2><i class="fas fa-link"></i> API Configuration</h2>
                 <div class="form-group">
                     <label for="apiUrl">
                         <i class="fas fa-server"></i> n8n API Endpoint URL:
@@ -932,18 +932,18 @@
                 </div>
                 
                 <div class="generate-section">
-                    <h2><i class="fas fa-magic"></i> Generate PDFs</h2>
-                    <p>Ready to generate professional PDFs for all contacts</p>
+                    <h2><i class="fas fa-magic"></i> Generate HTML</h2>
+                    <p>Ready to generate professional HTML pages for all contacts</p>
                     
                     <div style="display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap;">
                         <button class="btn btn-success" id="generatePdfsBtn">
-                            <i class="fas fa-file-pdf"></i> Generate All PDFs
+                            <i class="fas fa-file-code"></i> Generate All HTML Files
                         </button>
                         <button class="btn btn-warning" id="generateSpecificBtn">
-                            <i class="fas fa-user"></i> Generate Specific PDF
+                            <i class="fas fa-user"></i> Generate Specific HTML
                         </button>
                         <button class="btn btn-info" id="downloadSpecificBtn">
-                            <i class="fas fa-download"></i> Download Specific PDF
+                            <i class="fas fa-download"></i> Download Specific HTML
                         </button>
                     </div>
                     
@@ -953,7 +953,7 @@
                             <option value="">Choose a contact...</option>
                         </select>
                         <button class="btn btn-success" id="generateSelectedBtn" style="margin-top: 15px;">
-                            <i class="fas fa-file-pdf"></i> Generate Selected PDF
+                            <i class="fas fa-file-code"></i> Generate Selected HTML
                         </button>
                     </div>
                     
@@ -1024,9 +1024,7 @@
         </div>
     </footer>
 
-    <!-- Include required libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Include app script -->
     <script src="app.js"></script>
 </body>
 </html>

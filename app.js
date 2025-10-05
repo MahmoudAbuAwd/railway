@@ -21,10 +21,10 @@ class PDFGenerator {
       const eventBindings = {
           'fetchDataBtn': () => this.fetchData(),
           'demoDataBtn': () => this.loadDemoData(),
-          'generatePdfsBtn': () => this.generateAllPDFs(),
+          'generatePdfsBtn': () => this.generateAllHTMLs(),
           'generateSpecificBtn': () => this.showSpecificContactSection(),
           'downloadSpecificBtn': () => this.showSpecificContactSection(),
-          'generateSelectedBtn': () => this.generateSelectedPDF()
+          'generateSelectedBtn': () => this.generateSelectedHTML()
       };
 
       Object.entries(eventBindings).forEach(([elementId, handler]) => {
@@ -257,27 +257,21 @@ class PDFGenerator {
   }
 
   /**
-   * Generate PDFs for all contacts
+   * Generate HTML files for all contacts
    * Processes contacts sequentially with progress updates
    */
-  async generateAllPDFs() {
+  async generateAllHTMLs() {
       if (this.contacts.length === 0) {
           this.showGenerationStatus('No contacts to process', 'error');
           return;
       }
-
-      if (!this.checkLibrariesLoaded()) {
-          this.showGenerationStatus('PDF libraries not loaded. Please refresh the page.', 'error');
-          return;
-      }
-
       if (this.isGenerating) {
           this.showGenerationStatus('Generation already in progress', 'warning');
           return;
       }
 
       this.isGenerating = true;
-      this.showGenerationStatus('Starting PDF generation...', 'loading');
+      this.showGenerationStatus('Starting HTML generation...', 'loading');
       
       const results = {
           total: this.contacts.length,
@@ -300,11 +294,11 @@ class PDFGenerator {
               
               try {
                   this.showGenerationStatus(
-                      `Generating PDF for ${fullName} (${i + 1}/${results.total})...`, 
+                      `Generating HTML for ${fullName} (${i + 1}/${results.total})...`, 
                       'loading'
                   );
-                  
-                  await this.generatePDF(contact);
+
+                  await this.generateAndDownloadHTML(contact);
                   results.successful++;
                   results.processed++;
                   
@@ -315,7 +309,7 @@ class PDFGenerator {
                   await this.delay(500);
                   
               } catch (error) {
-                  console.error(`Error generating PDF for ${fullName}:`, error);
+                  console.error(`Error generating HTML for ${fullName}:`, error);
                   results.failed++;
                   results.processed++;
                   results.errors.push(`${fullName}: ${error.message}`);
@@ -324,7 +318,7 @@ class PDFGenerator {
           
           // Display final summary
           const summaryMessage = `
-              PDF generation complete! 
+              HTML generation complete! 
               Successful: ${results.successful}/${results.total}
               ${results.failed > 0 ? `Failed: ${results.failed}` : ''}
           `;
@@ -345,50 +339,21 @@ class PDFGenerator {
   }
 
   /**
-   * Generate PDF for a single contact
+   * Generate and download HTML for a single contact
    * @param {Object} contact - Contact data
    */
-  async generatePDF(contact) {
-      if (!this.checkLibrariesLoaded()) {
-          throw new Error('jsPDF or html2canvas library not loaded');
-      }
-
-      try {
-          const { jsPDF } = window.jspdf;
-          const pdf = new jsPDF({
-              orientation: 'portrait',
-              unit: 'mm',
-              format: 'a4',
-              compress: true
-          });
-
-          // Generate HTML content
-          const htmlContent = this.generateHTML(contact);
-          
-          // Create temporary container
-          const tempDiv = this.createTempContainer(htmlContent);
-          document.body.appendChild(tempDiv);
-
-          // Wait for content to render
-          await this.delay(2000);
-
-          // Convert to canvas
-          const canvas = await this.htmlToCanvas(tempDiv);
-
-          // Add canvas to PDF with pagination
-          this.addCanvasToPDF(pdf, canvas);
-
-          // Generate filename and save
-          const filename = this.generateFilename(contact);
-          pdf.save(filename);
-          
-          // Cleanup
-          this.removeTempContainer(tempDiv);
-          
-      } catch (error) {
-          console.error('PDF generation error:', error);
-          throw new Error(`PDF generation failed: ${error.message}`);
-      }
+  async generateAndDownloadHTML(contact) {
+      const htmlContent = this.generateHTML(contact);
+      const filename = this.generateHTMLFilename(contact);
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
   }
 
   /**
@@ -483,14 +448,14 @@ class PDFGenerator {
    * @param {Object} contact - Contact data
    * @returns {string} Sanitized filename
    */
-  generateFilename(contact) {
+  generateHTMLFilename(contact) {
       const fullName = this.getField(contact, 'Full Name', 'fullName', 'name') || 'Unknown';
       const sanitized = fullName
           .replace(/[^a-z0-9]/gi, '_')
           .replace(/_{2,}/g, '_')
           .toLowerCase();
       const timestamp = new Date().getTime();
-      return `${sanitized}_profile_${timestamp}.pdf`;
+      return `${sanitized}_profile_${timestamp}.html`;
   }
 
   /**
@@ -697,9 +662,9 @@ class PDFGenerator {
   }
 
   /**
-   * Generate PDF for selected contact
+   * Generate HTML for selected contact
    */
-  async generateSelectedPDF() {
+  async generateSelectedHTML() {
       const contactSelect = document.getElementById('contactSelect');
       if (!contactSelect) return;
       
@@ -717,19 +682,13 @@ class PDFGenerator {
           this.showGenerationStatus('Selected contact has no name', 'error');
           return;
       }
-      
-      if (!this.checkLibrariesLoaded()) {
-          this.showGenerationStatus('PDF libraries not loaded. Please refresh the page.', 'error');
-          return;
-      }
-      
-      this.showGenerationStatus(`Generating PDF for ${fullName}...`, 'loading');
+      this.showGenerationStatus(`Generating HTML for ${fullName}...`, 'loading');
       
       try {
-          await this.generatePDF(contact);
-          this.showGenerationStatus(`Successfully generated PDF for ${fullName}`, 'success');
+          await this.generateAndDownloadHTML(contact);
+          this.showGenerationStatus(`Successfully generated HTML for ${fullName}`, 'success');
       } catch (error) {
-          console.error(`Error generating PDF for ${fullName}:`, error);
+          console.error(`Error generating HTML for ${fullName}:`, error);
           this.showGenerationStatus(`Error: ${error.message}`, 'error');
       }
   }
@@ -755,16 +714,141 @@ class PDFGenerator {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${data.fullName} - Professional Profile</title>
+<title>${data.fullName} - Portfolio</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  ${this.getEnhancedStyles()}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; background: #ffffff; color: #1f2937; font-size: 18px; }
+  .hero { position: relative; width: 100%; min-height: 320px; background: radial-gradient(1200px 500px at 20% -40%, rgba(99,102,241,0.12), transparent 65%), radial-gradient(1000px 500px at 100% -20%, rgba(168,85,247,0.10), transparent 60%), linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); display: flex; align-items: center; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 32px 32px; width: 100%; }
+  .hero-card { display: grid; grid-template-columns: 180px 1fr; gap: 28px; align-items: center; background: #ffffff; border: 1px solid rgba(2,6,23,0.06); border-radius: 28px; padding: 28px; box-shadow: 0 20px 50px rgba(2,6,23,0.06); }
+  .avatar { width: 200px; height: 200px; border-radius: 20px; overflow: hidden; background: linear-gradient(135deg, #6366f1, #8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 72px; font-weight: 900; color: white; box-shadow: 0 18px 40px rgba(99,102,241,0.35); border: 5px solid rgba(2,6,23,0.04); }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .title { display: flex; flex-direction: column; gap: 10px; }
+  .name { font-size: 48px; font-weight: 900; letter-spacing: -0.8px; color: #0f172a; }
+  .role { font-size: 22px; font-weight: 800; color: #374151; }
+  .meta { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 6px; }
+  .meta-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: #eef2ff; color: #3730a3; border: 1px solid rgba(55,48,163,0.15); font-weight: 700; font-size: 13px; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 28px; margin-top: 28px; }
+  .section { background: #ffffff; border: 1px solid rgba(2,6,23,0.06); border-radius: 24px; padding: 30px; box-shadow: 0 18px 45px rgba(2,6,23,0.06); }
+  .section-header { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+  .badge { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; box-shadow: 0 10px 22px rgba(79,70,229,0.35); font-weight: 900; font-size: 20px; }
+  .section-title { font-size: 28px; font-weight: 900; color: #0f172a; letter-spacing: -0.4px; padding-bottom: 8px; box-shadow: inset 0 -3px 0 0 rgba(79,70,229,0.25); }
+  .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  .card { background: #ffffff; border: 1px solid rgba(2,6,23,0.06); border-radius: 18px; padding: 20px; box-shadow: 0 10px 24px rgba(2,6,23,0.06); transition: transform .2s ease, box-shadow .2s ease; }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(2,6,23,0.55); }
+  .label { font-size: 16px; text-transform: uppercase; letter-spacing: 1.2px; color: #4f46e5; font-weight: 900; margin-bottom: 10px; }
+  .value { font-size: 20px; color: #111827; font-weight: 700; line-height: 1.75; }
+  .value.muted { color: #4b5563; font-weight: 600; }
+  .stack { display: grid; gap: 16px; }
+  .quote { position: relative; padding: 20px; border-radius: 16px; background: #eef2ff; border-left: 4px solid #4f46e5; color: #1f2937; font-style: italic; font-size: 18px; }
+  .experience { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .xp { padding: 18px; border-radius: 14px; background: #f3f4f6; border-left: 4px solid #4f46e5; color: #1f2937; font-size: 18px; font-weight: 700; }
+  .company-hero { display: flex; align-items: center; gap: 20px; padding: 20px; border-radius: 18px; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border: 1px solid rgba(2,6,23,0.06); box-shadow: 0 12px 30px rgba(2,6,23,0.06); }
+  .company-logo { width: 110px; height: 110px; border-radius: 14px; background: white; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .company-logo img { width: 100%; height: 100%; object-fit: contain; }
+  .company-name { font-size: 30px; font-weight: 900; color: #0f172a; }
+  .company-tag { font-size: 18px; color: #4b5563; }
+  .list { display: grid; gap: 10px; }
+  .list li { list-style: none; padding-left: 18px; position: relative; color: #111827; }
+  .list li::before { content: ''; position: absolute; left: 0; top: 9px; width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(135deg, #4f46e5, #7c3aed); box-shadow: 0 0 0 2px rgba(79,70,229,0.2); }
+  @media (max-width: 1024px) { .cards { grid-template-columns: 1fr 1fr; } .experience { grid-template-columns: 1fr; } .hero-card { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) { .cards { grid-template-columns: 1fr; } .container { padding: 20px 16px; } .avatar { width: 140px; height: 140px; font-size: 52px; } .name { font-size: 34px; } .role { font-size: 18px; } .section { padding: 22px; } }
 </style>
 </head>
 <body>
-${this.getIDCardPage(data, initials)}
-${this.getProfilePage(data, totalPages)}
-${hasCompanyInfo ? this.getCompanyPage(data, totalPages) : ''}
+  <header class="hero">
+    <div class="container">
+      <div class="hero-card">
+        <div class="avatar">
+          ${data.contactPhotoUrl ? `<img src="${data.contactPhotoUrl}" alt="${data.fullName}" onerror="this.parentElement.textContent='${initials}'">` : `${initials}`}
+        </div>
+        <div class="title">
+          <div class="name">${data.fullName}</div>
+          ${this.hasValue(data.title) ? `<div class="role">${data.title}</div>` : ''}
+          <div class="meta">
+            ${this.hasValue(data.personState, data.personCountry) ? `<span class="meta-chip">📍 ${[data.personState, data.personCountry].filter(Boolean).join(', ')}</span>` : ''}
+            ${this.hasValue(data.education) ? `<span class="meta-chip">🎓 ${data.education}</span>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="grid">
+      <section class="section">
+        <div class="section-header">
+          <div class="badge">👤</div>
+          <h2 class="section-title">User Information</h2>
+        </div>
+        <div class="stack">
+          ${this.hasValue(data.summary) ? `<div class="quote">${data.summary}</div>` : ''}
+          <div class="cards">
+            ${this.hasValue(data.headline) ? `<div class="card"><div class="label">Headline</div><div class="value">${data.headline}</div></div>` : ''}
+            ${this.hasValue(data.personContactEmail) ? `<div class="card"><div class="label">Email</div><div class="value">${data.personContactEmail}</div></div>` : ''}
+            ${this.hasValue(data.contactPhone) ? `<div class="card"><div class="label">Primary Phone</div><div class="value">${data.contactPhone}</div></div>` : ''}
+            ${this.hasValue(data.contactSecondPhone) ? `<div class="card"><div class="label">Secondary Phone</div><div class="value">${data.contactSecondPhone}</div></div>` : ''}
+            ${this.hasValue(data.contactLinkedIn) ? `<div class="card"><div class="label">LinkedIn</div><div class="value"><a href="${data.contactLinkedIn}" style="color:#a5b4fc;text-decoration:none;">${data.contactLinkedIn}</a></div></div>` : ''}
+          </div>
+          ${this.hasValue(data.currentExperience, data.experience2, data.experience3, data.experience4) ? `
+          <div class="experience">
+            ${this.hasValue(data.currentExperience) ? `<div class="xp"><span style="font-weight:800;color:#c7d2fe;">Current</span><br>${data.currentExperience}</div>` : ''}
+            ${this.hasValue(data.experience2) ? `<div class="xp">${data.experience2}</div>` : ''}
+            ${this.hasValue(data.experience3) ? `<div class="xp">${data.experience3}</div>` : ''}
+            ${this.hasValue(data.experience4) ? `<div class="xp">${data.experience4}</div>` : ''}
+          </div>
+          ` : ''}
+          ${this.hasValue(data.lastPostPerson1, data.lastPostPerson2, data.lastPostPerson3) ? `
+          <div class="cards" style="grid-template-columns:1fr;">
+            ${this.hasValue(data.lastPostPerson1) ? `<div class="card"><div class="label">Recent Post 1</div><div class="value muted">${data.lastPostPerson1}</div></div>` : ''}
+            ${this.hasValue(data.lastPostPerson2) ? `<div class="card"><div class="label">Recent Post 2</div><div class="value muted">${data.lastPostPerson2}</div></div>` : ''}
+            ${this.hasValue(data.lastPostPerson3) ? `<div class="card"><div class="label">Recent Post 3</div><div class="value muted">${data.lastPostPerson3}</div></div>` : ''}
+          </div>
+          ` : ''}
+        </div>
+      </section>
+
+      ${hasCompanyInfo ? `
+      <section class="section">
+        <div class="section-header">
+          <div class="badge">🏢</div>
+          <h2 class="section-title">Company Information</h2>
+        </div>
+        <div class="stack">
+          ${(this.hasValue(data.companyName) || this.hasValue(data.companyLogoUrl) || this.hasValue(data.companyTagline)) ? `
+          <div class="company-hero">
+            <div class="company-logo">
+              ${this.hasValue(data.companyLogoUrl) ? `<img src="${data.companyLogoUrl}" alt="${data.companyName}">` : `<span style=\"font-weight:900;color:#6366f1;font-size:24px\">${(data.companyName||'?').charAt(0).toUpperCase()}</span>`}
+            </div>
+            <div>
+              ${this.hasValue(data.companyName) ? `<div class="company-name">${data.companyName}</div>` : ''}
+              ${this.hasValue(data.companyTagline) ? `<div class="company-tag">${data.companyTagline}</div>` : ''}
+            </div>
+          </div>
+          ` : ''}
+          <div class="cards">
+            ${this.hasValue(data.companyWebsite) ? `<div class="card"><div class="label">Website</div><div class="value"><a href="${data.companyWebsite}" style="color:#a5b4fc;text-decoration:none;">${data.companyWebsite}</a></div></div>` : ''}
+            ${this.hasValue(data.contactCorporatePhone) ? `<div class="card"><div class="label">Corporate Phone</div><div class="value">${data.contactCorporatePhone}</div></div>` : ''}
+            ${this.hasValue(data.companyIndustry) ? `<div class="card"><div class="label">Industry</div><div class="value">${data.companyIndustry}</div></div>` : ''}
+          </div>
+          ${this.hasValue(data.companyAbout) ? `<div class="card"><div class="label">About</div><div class="value muted">${data.companyAbout}</div></div>` : ''}
+          ${this.hasValue(data.companyWebsiteBrief) ? `<div class="card"><div class="label">Brief</div><div class="value muted">${data.companyWebsiteBrief}</div></div>` : ''}
+          ${this.hasValue(data.companyAddress) ? `<div class="card"><div class="label">Address</div><div class="value">${data.companyAddress}</div></div>` : ''}
+          ${this.hasValue(data.companyPartners) ? `<div class="card"><div class="label">Partners</div><ul class="list">${data.companyPartners.split(';').map(p => `<li>${p.trim()}</li>`).join('')}</ul></div>` : ''}
+          ${this.hasValue(data.companyLastEvents) ? `<div class="card"><div class="label">Recent Events</div><div class="value muted">${data.companyLastEvents}</div></div>` : ''}
+          ${this.hasValue(data.companyLastPost1, data.companyLastPost2, data.companyLastPost3) ? `
+          <div class="cards" style="grid-template-columns:1fr;">
+            ${this.hasValue(data.companyLastPost1) ? `<div class="card"><div class="label">Company Post 1</div><div class="value muted">${data.companyLastPost1}</div></div>` : ''}
+            ${this.hasValue(data.companyLastPost2) ? `<div class="card"><div class="label">Company Post 2</div><div class="value muted">${data.companyLastPost2}</div></div>` : ''}
+            ${this.hasValue(data.companyLastPost3) ? `<div class="card"><div class="label">Company Post 3</div><div class="value muted">${data.companyLastPost3}</div></div>` : ''}
+          </div>
+          ` : ''}
+        </div>
+      </section>
+      ` : ''}
+    </div>
+  </main>
 </body>
 </html>
       `;

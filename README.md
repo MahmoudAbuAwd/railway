@@ -1,12 +1,12 @@
-# CSV to PDF Generator
+# CSV to HTML Generator
 
-A modern, professional PDF generation system that creates beautiful profile documents from CSV data. Works both as a Node.js command-line tool and as a browser-based web application.
+A modern, professional HTML generation system that creates beautiful profile pages from CSV or API data. Works both as a Node.js command-line tool and as a browser-based web application.
 
 ## ✨ Features
 
 - 🌐 **Dual Mode**: Browser-based web app + Node.js CLI tool
 - 📊 **API Integration**: Fetches data from n8n webhook endpoints
-- 📄 **Professional PDFs**: Multi-page documents with modern design
+- 📝 **Professional HTML**: Multi-section pages with modern design
 - 🎨 **Beautiful UI**: Clean, gradient-based interface
 - ⚡ **Fast Processing**: Optimized for batch generation
 - 📱 **Responsive Design**: Works on all devices
@@ -14,7 +14,7 @@ A modern, professional PDF generation system that creates beautiful profile docu
 
 ## 🚀 Quick Start
 
-### Option 1: Web Application (GitHub Pages)
+### Option 1: Web Application (Static Hosting)
 
 1. **Fork this repository**
 2. **Enable GitHub Pages**:
@@ -23,12 +23,12 @@ A modern, professional PDF generation system that creates beautiful profile docu
    - Choose "main" branch and "/ (root)" folder
    - Save and wait for deployment
 
-3. **Access your app**: `https://YOUR_USERNAME.github.io/csv-to-pdf-generator/`
+3. **Access your app**: `https://YOUR_USERNAME.github.io/csv-to-html-generator/`
 
 4. **Use the application**:
    - Enter your n8n webhook URL (or click "Demo Mode")
    - Click "Fetch Data" to load contacts
-   - Click "Generate All PDFs" or select specific contacts
+   - Click "Generate All HTML Files" or select specific contacts
 
 ### Option 2: Node.js CLI Tool
 
@@ -39,7 +39,7 @@ A modern, professional PDF generation system that creates beautiful profile docu
 
 2. **Prepare your CSV file**: Place your data in `test.csv`
 
-3. **Generate PDFs**:
+3. **Generate HTML files**:
    ```bash
    npm run generate
    ```
@@ -48,7 +48,7 @@ A modern, professional PDF generation system that creates beautiful profile docu
    node pdf_generator.js
    ```
 
-4. **Find PDFs**: Check the `generated_pdfs/` folder
+4. **Find HTML files**: Check the `generated_html/` folder
 
 ## 📋 CSV Data Format
 
@@ -89,7 +89,7 @@ Your CSV file should include the following columns:
 - `Contact Corporate Phone` - Corporate phone number
 - `Company Address` - Full address
 
-## 🎨 PDF Design Features
+## 🎨 HTML Design Features
 
 - **ID Card Page**: Beautiful cover with photo, name, and key info
 - **Professional Sections**: Organized information with gradient accents
@@ -97,7 +97,7 @@ Your CSV file should include the following columns:
 - **Color Scheme**: Purple-blue gradient theme throughout
 - **Smart Spacing**: Optimized layout with no wasted space
 - **Copyable Text**: All content is selectable and copyable
-- **Multi-Page Support**: Automatic pagination for long content
+- **Print-Friendly**: Styles include print considerations
 - **Company Card**: Special design for company information
 
 ## 🔧 Configuration
@@ -165,12 +165,9 @@ The web version works with any API that returns JSON data with the fields listed
 
 **Frontend (Web App)**:
 - Pure JavaScript (ES6+)
-- jsPDF - PDF generation
-- html2canvas - HTML to image conversion
 - Modern CSS with gradients and flexbox
 
 **Backend (Node.js)**:
-- Puppeteer - Headless browser automation
 - PapaParse - CSV parsing
 - Node.js File System API
 
@@ -199,7 +196,7 @@ The web version works with any API that returns JSON data with the fields listed
 2. Install dependencies: `npm install`
 3. Edit `test.csv` with your data
 4. Run: `node pdf_generator.js`
-5. Check `generated_pdfs/` for output
+5. Check `generated_html/` for output
 
 ## 🤝 Contributing
 
