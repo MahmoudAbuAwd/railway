@@ -54,37 +54,60 @@ const setupOutputDir = () => {
 
 // Generate professional HTML template with dynamic pages
 const generateHTML = (user) => {
+  // Extract first and last name from Full Name
+  const fullName = getField(user, 'Full Name');
+  const nameParts = fullName ? fullName.split(' ') : ['', ''];
+  const firstName = nameParts[0] || '';
+  const lastName = nameParts.slice(1).join(' ') || '';
+  
+  // Parse experiences from the Experiences field
+  const experiences = getField(user, 'Experiences');
+  const experienceList = experiences ? experiences.split(' | ') : [];
+  
   const data = {
-    firstName: getField(user, 'First Name', 'first_name'),
-    lastName: getField(user, 'Last Name', 'last_name'),
-    title: getField(user, 'Title', 'title'),
-    currentExperience: getField(user, 'current experience', 'Current Experience'),
-    experience2: getField(user, 'experience 2'),
-    experience3: getField(user, 'experience 3'),
-    experience4: getField(user, 'experience 4'),
-    company: getField(user, 'current experience', 'Current Experience')?.split(' - ')[0] || '',
-    email: getField(user, 'person email', 'Email', 'email'),
-    photoUrl: getField(user, 'person photo url', 'Person Photo URL', 'photo'),
-    linkedinHeadline: getField(user, 'person linkedin headline', 'Person LinkedIn Headline'),
-    linkedinAbout: getField(user, 'person linkedin about', 'Person LinkedIn About'),
-    education: getField(user, 'His education'),
-    linkedinUrl: getField(user, 'Person Linkedin Url'),
-    companyHeadline: getField(user, 'company headline', 'Company Headline'),
-    websiteBrief: getField(user, 'website brief', 'Website Brief'),
-    companyAbout: getField(user, 'company about', 'Company About'),
-    companyLogoUrl: getField(user, 'company logo url'),
-    mobile: getField(user, 'Mobile Phone'),
-    secondPhone: getField(user, 'Second Phone'),
-    corporatePhone: getField(user, 'Corporate Phone'),
-    industry: getField(user, 'Industry'),
-    address: getField(user, 'Company Address'),
-    city: getField(user, 'Company City'),
-    state: getField(user, 'Company State', 'State', 'person State'),
-    country: getField(user, 'Company Country', 'Country', 'person Country'),
-    personState: getField(user, 'person State'),
-    personCountry: getField(user, 'person Country'),
-    lastPostCompany: getField(user, 'last post for company', 'Last Post for Company'),
-    lastPostPerson: getField(user, 'last post for person', 'Last Post for Person')
+    // Personal Information - New CSV Schema Mapping
+    fullName: getField(user, 'Full Name'),
+    contactPhotoUrl: getField(user, 'Contact Photo URL'),
+    title: getField(user, 'Person Title'),
+    personState: getField(user, 'Person State'),
+    personCountry: getField(user, 'Person Country'),
+    summary: getField(user, 'Summary About The Person'),
+    headline: getField(user, 'Person Headline'),
+    education: getField(user, 'Education'),
+    currentExperience: getField(user, 'Current Experience'),
+    experience2: getField(user, 'Experience 2'),
+    experience3: getField(user, 'Experience 3'),
+    experience4: getField(user, 'Experience 4'),
+    lastPostPerson1: getField(user, 'Last Post For Person'),
+    lastPostPerson2: getField(user, 'Last Post For Person 2'),
+    lastPostPerson3: getField(user, 'Last Post For Person 3'),
+    personContactEmail: getField(user, 'Person Contact Email'),
+    contactPhone: getField(user, 'Contact Phone'),
+    contactSecondPhone: getField(user, 'Contact Second Phone'),
+    contactLinkedIn: getField(user, 'Contact LinkedIn'),
+    
+    // Company Information - New CSV Schema Mapping
+    companyName: getField(user, 'Company Name'),
+    companyLogoUrl: getField(user, 'Company Logo URL'),
+    companyWebsite: getField(user, 'Company Website'),
+    companyTagline: getField(user, 'Company Tagline'),
+    companyAbout: getField(user, 'Company About'),
+    companyIndustry: getField(user, 'Company Industry'),
+    companyWebsiteBrief: getField(user, 'Company information Brief'),
+    companyPartners: getField(user, 'Company Partners'),
+    companyLastEvents: getField(user, 'Company Last Events'),
+    companyLastPost1: getField(user, 'Company Last Post'),
+    companyLastPost2: getField(user, 'Company Last Post 2'),
+    companyLastPost3: getField(user, 'Company Last Post 3'),
+    contactCorporatePhone: getField(user, 'Contact Corporate Phone'),
+    companyAddress: getField(user, 'Company Address'),
+    companyCity: getField(user, 'Company City'),
+    companyState: getField(user, 'Company State'),
+    companyCountry: getField(user, 'Company Country'),
+    
+    // Helper fields
+    firstName: firstName,
+    lastName: lastName
   };
   
   const initials = `${data.firstName.charAt(0)}${data.lastName.charAt(0)}`.toUpperCase();
@@ -93,9 +116,9 @@ const generateHTML = (user) => {
   let totalPages = 1; // Start with personal profile
   
   // Check if company info exists to add company pages
-  const hasCompanyInfo = data.company || data.companyHeadline || data.websiteBrief || 
-                         data.companyAbout || data.industry || data.address || 
-                         data.city || data.lastPostCompany;
+  const hasCompanyInfo = data.companyName || data.companyWebsite || data.companyTagline || data.companyWebsiteBrief || 
+                         data.companyAbout || data.companyIndustry || data.companyAddress || 
+                         data.companyCity || data.companyLastPosts || data.partners || data.lastEvents;
   
   if (hasCompanyInfo) {
     totalPages += 1; // At least one company page
@@ -107,7 +130,8 @@ const generateHTML = (user) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${data.firstName} ${data.lastName} - Professional Profile</title>
+  <title>${data.fullName} - Professional Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -116,27 +140,553 @@ const generateHTML = (user) => {
     }
     
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
       background: #ffffff;
       color: #1a202c;
-      line-height: 1.6;
+      line-height: 1.7;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
+    }
+    
+    * {
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
+    }
+    
+    /* Ensure all text is copyable */
+    .id-card, .company-card, .section, .field-group, .field-value, .field-label, 
+    .hero-name, .hero-title, .hero-location, .current-role, .experience-title,
+    .company-name-large, .company-tagline-large, .id-name, .id-current-role,
+    .id-info-value, .id-info-label {
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
     }
     
     .page {
       width: 210mm;
       min-height: 297mm;
-      background: white;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e2e8f0 100%);
       margin: 0;
       padding: 0;
       display: flex;
       flex-direction: column;
       page-break-after: always;
       position: relative;
+      overflow: visible;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+      border-radius: 8px;
+    }
+    
+    .page:last-child {
+      page-break-after: avoid;
+    }
+    
+    /* ID Card Page */
+    .id-card-page {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .id-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 32px;
+      padding: 60px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .id-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    }
+    
+    .id-photo {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 0 auto 40px auto;
+      border: 8px solid #ffffff;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      display: block;
+    }
+    
+    .id-name {
+      font-size: 48px;
+      font-weight: 900;
+      color: #1a202c;
+      margin-bottom: 20px;
+      letter-spacing: -1px;
+    }
+    
+    .id-current-role {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 30px;
+    }
+    
+    .id-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 40px;
+    }
+    
+    .id-info-item {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      padding: 24px;
+      border-radius: 16px;
+      border-left: 6px solid #667eea;
+    }
+    
+    .id-info-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: #667eea;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    
+    .id-info-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a202c;
+      line-height: 1.5;
+    }
+    
+    /* Company Card */
+    .company-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 12px 40px rgba(102, 126, 234, 0.15);
+      border: 1px solid rgba(102, 126, 234, 0.2);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    
+    .company-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    }
+    
+    .company-header {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 16px;
+    }
+    
+    .company-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 16px;
+      object-fit: contain;
+      background: white;
+      border: 3px solid #e2e8f0;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      flex-shrink: 0;
+    }
+    
+    .company-info {
+      flex: 1;
+    }
+    
+    .company-name-large {
+      font-size: 28px;
+      font-weight: 800;
+      color: #1a202c;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .company-tagline-large {
+      font-size: 18px;
+      font-weight: 600;
+      color: #4a5568;
+      line-height: 1.4;
     }
     
     /* Page 1: Personal Profile */
     .page-1 {
-      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e0 100%);
+    }
+    
+    /* Comprehensive Section Styles */
+    .section {
+      margin-bottom: 16px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e2e8f0 100%);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.12);
+      border: 1px solid rgba(102, 126, 234, 0.2);
+      position: relative;
+      overflow: visible;
+    }
+    
+    .section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    
+    .section-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+      flex-shrink: 0;
+      color: white;
+    }
+    
+    .section-title {
+      font-size: 32px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.8px;
+      position: relative;
+      padding-bottom: 8px;
+    }
+    
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      border-radius: 3px;
+    }
+    
+    .field-group {
+      margin-bottom: 12px;
+      padding: 16px;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
+    }
+    
+    .field-label {
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .field-value {
+      font-size: 18px;
+      color: #1a202c;
+      line-height: 1.8;
+      word-break: break-word;
+      font-weight: 500;
+    }
+    
+    .field-value.long-text {
+      font-size: 17px;
+      line-height: 1.9;
+      padding: 20px;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+    }
+    
+    a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    a:hover {
+      text-decoration: underline;
+    }
+    
+    .field-group {
+      background: white;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 10px rgba(37, 99, 235, 0.08);
+      border-left: 4px solid #2563eb;
+    }
+    
+    .field-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      color: #2563eb;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .field-value {
+      font-size: 15px;
+      color: #1e293b;
+      font-weight: 500;
+      line-height: 1.7;
+      word-break: break-word;
+      text-align: justify;
+      hyphens: auto;
+    }
+    
+    .field-value.long-text {
+      font-size: 14px;
+      line-height: 1.8;
+      text-align: left;
+      margin-bottom: 12px;
+      padding: 8px 0;
+      border-left: 3px solid #e2e8f0;
+      padding-left: 12px;
+      background: #f8fafc;
+      border-radius: 4px;
+      font-weight: 400;
+    }
+    
+    .company-logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: contain;
+      background: white;
+      border: 2px solid #e2e8f0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .company-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding: 16px;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      border-radius: 12px;
+      border-left: 4px solid #2563eb;
+    }
+    
+    .company-info {
+      flex: 1;
+    }
+    
+    .company-name-large {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 4px 0;
+    }
+    
+    .company-tagline-large {
+      font-size: 16px;
+      color: #64748b;
+      margin: 0;
+    }
+    
+    .experience-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    
+    .experience-item {
+      padding: 20px;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
+    }
+    
+    .experience-title {
+      font-weight: 700;
+      font-size: 18px;
+      color: #1e293b;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .posts-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 12px;
+    }
+    
+    .post-item {
+      padding: 20px;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
+      font-size: 16px;
+      line-height: 1.8;
+    }
+    
+    .bullet-list {
+      margin: 0;
+      padding-left: 24px;
+    }
+    
+    .bullet-list li {
+      margin-bottom: 12px;
+      font-size: 16px;
+      color: #1e293b;
+      line-height: 1.7;
+    }
+    
+    .hero-section {
+      display: flex;
+      align-items: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      color: white;
+      padding: 60px;
+      border-radius: 32px;
+      margin-bottom: 48px;
+      gap: 48px;
+      box-shadow: 0 25px 50px rgba(102, 126, 234, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+      opacity: 0.3;
+    }
+    
+    .hero-photo {
+      flex-shrink: 0;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      border: 8px solid rgba(255, 255, 255, 0.3);
+      object-fit: cover;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .hero-content {
+      flex: 1;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .hero-name {
+      font-size: 56px;
+      font-weight: 900;
+      margin: 0 0 20px 0;
+      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      letter-spacing: -1.2px;
+    }
+    
+    .hero-title {
+      font-size: 28px;
+      font-weight: 700;
+      opacity: 0.95;
+      margin: 0 0 16px 0;
+      letter-spacing: -0.4px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .hero-location {
+      font-size: 20px;
+      opacity: 0.85;
+      margin: 0 0 20px 0;
+      font-weight: 600;
+    }
+    
+    .current-role {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 16px 28px;
+      border-radius: 50px;
+      font-size: 20px;
+      font-weight: 700;
+      margin-top: 20px;
+      display: inline-block;
+      backdrop-filter: blur(10px);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .content-area {
+      padding: 32px;
+      overflow: visible;
     }
     
     /* Modern Split Hero Section */
@@ -149,7 +699,7 @@ const generateHTML = (user) => {
       border-bottom: 1px solid #e2e8f0;
     }
     
-    /* Gradient Background Bar */
+    /* Gradient Background Bar - Professional Blue Theme */
     .hero::before {
       content: '';
       position: absolute;
@@ -157,7 +707,7 @@ const generateHTML = (user) => {
       left: 0;
       right: 0;
       height: 140px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
       z-index: 0;
     }
     
@@ -295,11 +845,14 @@ const generateHTML = (user) => {
       padding: 32px 45px 60px;
       flex: 1;
       position: relative;
+      overflow: visible;
     }
     
     .section {
       margin-bottom: 28px;
       page-break-inside: avoid;
+      break-inside: avoid;
+      overflow: hidden;
     }
     
     .section-header {
@@ -313,14 +866,14 @@ const generateHTML = (user) => {
     .section-icon {
       width: 38px;
       height: 38px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 18px;
       box-shadow: 
-        0 6px 18px rgba(102, 126, 234, 0.35),
+        0 6px 18px rgba(37, 99, 235, 0.35),
         0 0 0 1px rgba(255,255,255,0.1) inset;
       flex-shrink: 0;
     }
@@ -341,20 +894,20 @@ const generateHTML = (user) => {
       left: 0;
       width: 40px;
       height: 3px;
-      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
       border-radius: 2px;
     }
     
     /* Professional Summary */
     .summary-box {
-      background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
-      border-left: 4px solid #8b5cf6;
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      border-left: 4px solid #2563eb;
       padding: 18px 22px;
       border-radius: 12px;
       margin-bottom: 12px;
       box-shadow: 
-        0 4px 14px rgba(139, 92, 246, 0.12),
-        0 0 0 1px rgba(139, 92, 246, 0.08);
+        0 4px 14px rgba(37, 99, 235, 0.12),
+        0 0 0 1px rgba(37, 99, 235, 0.08);
       position: relative;
       overflow: hidden;
     }
@@ -365,7 +918,7 @@ const generateHTML = (user) => {
       top: -20px;
       left: 10px;
       font-size: 80px;
-      color: rgba(139, 92, 246, 0.06);
+      color: rgba(37, 99, 235, 0.06);
       font-weight: 900;
       line-height: 1;
     }
@@ -387,11 +940,11 @@ const generateHTML = (user) => {
     
     .experience-item {
       background: white;
-      border: 2px solid #e0e7ff;
+      border: 2px solid #dbeafe;
       border-radius: 12px;
       padding: 16px 20px;
       position: relative;
-      box-shadow: 0 2px 10px rgba(99, 102, 241, 0.06);
+      box-shadow: 0 2px 10px rgba(37, 99, 235, 0.06);
       transition: all 0.3s;
     }
     
@@ -402,7 +955,7 @@ const generateHTML = (user) => {
       top: 0;
       width: 4px;
       height: 100%;
-      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
       border-radius: 12px 0 0 12px;
       opacity: 0;
       transition: opacity 0.3s;
@@ -417,7 +970,7 @@ const generateHTML = (user) => {
     
     .current-job-badge {
       display: inline-block;
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
       color: white;
       padding: 3px 10px;
       border-radius: 6px;
@@ -426,7 +979,7 @@ const generateHTML = (user) => {
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-left: 10px;
-      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+      box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
     }
     
     /* Contact Grid with Cards */
@@ -438,11 +991,11 @@ const generateHTML = (user) => {
     
     .contact-card {
       background: white;
-      border: 2px solid #e0e7ff;
+      border: 2px solid #dbeafe;
       border-radius: 12px;
       padding: 16px 18px;
       transition: all 0.3s;
-      box-shadow: 0 2px 10px rgba(99, 102, 241, 0.06);
+      box-shadow: 0 2px 10px rgba(37, 99, 235, 0.06);
       position: relative;
       overflow: hidden;
     }
@@ -454,7 +1007,7 @@ const generateHTML = (user) => {
       left: 0;
       width: 4px;
       height: 100%;
-      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
       opacity: 0;
       transition: opacity 0.3s;
     }
@@ -463,7 +1016,7 @@ const generateHTML = (user) => {
       font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: #667eea;
+      color: #2563eb;
       font-weight: 800;
       margin-bottom: 6px;
       display: flex;
@@ -487,12 +1040,12 @@ const generateHTML = (user) => {
     
     .post-card {
       background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-      border-left: 4px solid #10b981;
+      border-left: 4px solid #059669;
       padding: 16px 20px;
       border-radius: 12px;
       box-shadow: 
-        0 4px 14px rgba(16, 185, 129, 0.12),
-        0 0 0 1px rgba(16, 185, 129, 0.08);
+        0 4px 14px rgba(5, 150, 105, 0.12),
+        0 0 0 1px rgba(5, 150, 105, 0.08);
       position: relative;
     }
     
@@ -518,12 +1071,12 @@ const generateHTML = (user) => {
     /* Education Card */
     .education-card {
       background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-      border-left: 4px solid #f59e0b;
+      border-left: 4px solid #d97706;
       padding: 16px 20px;
       border-radius: 12px;
       box-shadow: 
-        0 4px 14px rgba(245, 158, 11, 0.15),
-        0 0 0 1px rgba(245, 158, 11, 0.08);
+        0 4px 14px rgba(217, 119, 6, 0.15),
+        0 0 0 1px rgba(217, 119, 6, 0.08);
       position: relative;
       overflow: hidden;
     }
@@ -539,7 +1092,7 @@ const generateHTML = (user) => {
     
     .education-text {
       font-size: 14.5px;
-      color: #78350f;
+      color: #92400e;
       font-weight: 600;
       line-height: 1.6;
       position: relative;
@@ -556,7 +1109,7 @@ const generateHTML = (user) => {
       padding: 45px 45px;
       position: relative;
       overflow: hidden;
-      border-bottom: 4px solid #667eea;
+      border-bottom: 4px solid #2563eb;
       min-height: 200px;
     }
     
@@ -568,8 +1121,8 @@ const generateHTML = (user) => {
       right: 0;
       bottom: 0;
       background-image: 
-        linear-gradient(30deg, rgba(102, 126, 234, 0.08) 12%, transparent 12.5%, transparent 87%, rgba(102, 126, 234, 0.08) 87.5%, rgba(102, 126, 234, 0.08)),
-        linear-gradient(150deg, rgba(102, 126, 234, 0.08) 12%, transparent 12.5%, transparent 87%, rgba(102, 126, 234, 0.08) 87.5%, rgba(102, 126, 234, 0.08));
+        linear-gradient(30deg, rgba(37, 99, 235, 0.08) 12%, transparent 12.5%, transparent 87%, rgba(37, 99, 235, 0.08) 87.5%, rgba(37, 99, 235, 0.08)),
+        linear-gradient(150deg, rgba(37, 99, 235, 0.08) 12%, transparent 12.5%, transparent 87%, rgba(37, 99, 235, 0.08) 87.5%, rgba(37, 99, 235, 0.08));
       background-size: 60px 100px;
       opacity: 0.3;
     }
@@ -606,7 +1159,7 @@ const generateHTML = (user) => {
     .company-logo-placeholder {
       font-size: 42px;
       font-weight: 900;
-      color: #667eea;
+      color: #2563eb;
     }
     
     .company-info-section {
@@ -615,7 +1168,7 @@ const generateHTML = (user) => {
     
     .company-badge {
       display: inline-block;
-      background: rgba(102, 126, 234, 0.25);
+      background: rgba(37, 99, 235, 0.25);
       backdrop-filter: blur(8px);
       padding: 6px 16px;
       border-radius: 20px;
@@ -624,7 +1177,7 @@ const generateHTML = (user) => {
       text-transform: uppercase;
       letter-spacing: 1.2px;
       margin-bottom: 12px;
-      border: 1.5px solid rgba(102, 126, 234, 0.4);
+      border: 1.5px solid rgba(37, 99, 235, 0.4);
     }
     
     .company-name {
@@ -660,6 +1213,7 @@ const generateHTML = (user) => {
     /* Company Content Section */
     .company-content {
       padding: 32px 45px 60px;
+      overflow: visible;
     }
     
     .info-card {
@@ -670,10 +1224,11 @@ const generateHTML = (user) => {
       box-shadow: 
         0 6px 24px rgba(0,0,0,0.06),
         0 0 0 1px rgba(0,0,0,0.02);
-      border-left: 4px solid #667eea;
+      border-left: 4px solid #2563eb;
       position: relative;
       overflow: hidden;
       page-break-inside: avoid;
+      break-inside: avoid;
     }
     
     .info-card::before {
@@ -683,7 +1238,7 @@ const generateHTML = (user) => {
       right: 0;
       width: 150px;
       height: 150px;
-      background: radial-gradient(circle, rgba(102, 126, 234, 0.04) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.04) 0%, transparent 70%);
       border-radius: 50%;
     }
     
@@ -698,13 +1253,13 @@ const generateHTML = (user) => {
     .info-card-icon {
       width: 36px;
       height: 36px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 18px;
-      box-shadow: 0 4px 14px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
       flex-shrink: 0;
     }
     
@@ -726,13 +1281,14 @@ const generateHTML = (user) => {
     /* Location Card */
     .location-card {
       background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-      border: 2px solid #f59e0b;
+      border: 2px solid #d97706;
       border-radius: 12px;
       padding: 20px 24px;
-      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.15);
+      box-shadow: 0 4px 14px rgba(217, 119, 6, 0.15);
       position: relative;
       overflow: hidden;
       page-break-inside: avoid;
+      break-inside: avoid;
     }
     
     .location-card::before {
@@ -754,13 +1310,13 @@ const generateHTML = (user) => {
     .location-icon {
       width: 32px;
       height: 32px;
-      background: #f59e0b;
+      background: #d97706;
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 16px;
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
       flex-shrink: 0;
     }
     
@@ -773,7 +1329,7 @@ const generateHTML = (user) => {
     
     .location-text {
       font-size: 14.5px;
-      color: #78350f;
+      color: #92400e;
       font-weight: 600;
       line-height: 1.6;
       position: relative;
@@ -787,15 +1343,16 @@ const generateHTML = (user) => {
       gap: 14px;
       margin-bottom: 20px;
       page-break-inside: avoid;
+      break-inside: avoid;
     }
     
     .stat-card {
       background: white;
-      border: 2px solid #e0e7ff;
+      border: 2px solid #dbeafe;
       border-radius: 10px;
       padding: 16px;
       text-align: center;
-      box-shadow: 0 2px 10px rgba(99, 102, 241, 0.08);
+      box-shadow: 0 2px 10px rgba(37, 99, 235, 0.08);
     }
     
     .stat-icon {
@@ -806,7 +1363,7 @@ const generateHTML = (user) => {
     .stat-label {
       font-size: 10px;
       text-transform: uppercase;
-      color: #667eea;
+      color: #2563eb;
       font-weight: 700;
       letter-spacing: 0.8px;
       margin-bottom: 6px;
@@ -827,7 +1384,7 @@ const generateHTML = (user) => {
       left: 0;
       right: 0;
       padding: 12px 45px;
-      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
       text-align: center;
       color: white;
       font-size: 11px;
@@ -839,263 +1396,401 @@ const generateHTML = (user) => {
       .page {
         page-break-after: always;
       }
-      .section, .info-card, .location-card, .stats-grid {
+      .section, .info-card, .location-card, .stats-grid, .experience-timeline, .contact-grid, .posts-grid {
         page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      .hero, .company-hero {
+        page-break-after: avoid;
+        break-after: avoid;
+      }
+      .content, .company-content {
+        overflow: visible;
       }
     }
   </style>
 </head>
 <body>
-  <!-- PERSONAL PROFILE PAGE(S) -->
-  <div class="page page-1">
-    <div class="hero">
-      <div class="hero-content">
-        <div class="profile-avatar">
-          ${data.photoUrl ? 
-            `<img src="${data.photoUrl}" alt="${data.firstName} ${data.lastName}" onerror="this.parentElement.innerHTML='${initials}'">` :
-            initials
-          }
+  <!-- ID CARD PAGE -->
+  <div class="page id-card-page">
+    <div class="id-card">
+      ${data.contactPhotoUrl && data.contactPhotoUrl !== 'N/A' && data.contactPhotoUrl.trim() !== '' ? `
+        <img src="${data.contactPhotoUrl}" alt="${data.fullName}" class="id-photo" />
+      ` : `
+        <div class="id-photo" style="background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; font-size: 72px; font-weight: bold; color: white;">
+          ${data.fullName ? data.fullName.split(' ').map(n => n[0]).join('') : '??'}
         </div>
-        <div class="hero-info">
-          <h1 class="hero-name">${data.firstName} ${data.lastName}</h1>
-          ${data.title ? `<div class="hero-title">${data.title}</div>` : ''}
-          <div class="hero-meta">
-            ${data.company ? `
-            <div class="hero-meta-item">
-              <div class="hero-meta-icon">🏢</div>
-              <span>${data.company}</span>
-            </div>
-            ` : ''}
-            ${data.personState && data.personCountry ? `
-            ${data.company ? `<div class="hero-divider"></div>` : ''}
-            <div class="hero-meta-item">
-              <div class="hero-meta-icon">📍</div>
-              <span>${data.personState}, ${data.personCountry}</span>
-            </div>
-            ` : ''}
-          </div>
+      `}
+      <h1 class="id-name">${data.fullName || 'N/A'}</h1>
+      ${data.currentExperience && data.currentExperience !== 'N/A' && data.currentExperience.trim() !== '' ? `
+        <div class="id-current-role">${data.currentExperience}</div>
+      ` : ''}
+      
+      <div class="id-info-grid">
+        ${(data.personState && data.personState !== 'N/A' && data.personState.trim() !== '') || (data.personCountry && data.personCountry !== 'N/A' && data.personCountry.trim() !== '') ? `
+        <div class="id-info-item">
+          <div class="id-info-label">Location</div>
+          <div class="id-info-value">${[data.personState, data.personCountry].filter(Boolean).join(', ')}</div>
         </div>
+        ` : ''}
+        
+        ${data.education && data.education !== 'N/A' && data.education.trim() !== '' ? `
+        <div class="id-info-item">
+          <div class="id-info-label">Education</div>
+          <div class="id-info-value">${data.education}</div>
+        </div>
+        ` : ''}
+        
+        ${data.title && data.title !== 'N/A' && data.title.trim() !== '' ? `
+        <div class="id-info-item">
+          <div class="id-info-label">Title</div>
+          <div class="id-info-value">${data.title}</div>
+        </div>
+        ` : ''}
       </div>
     </div>
-    
-    <div class="content">
-      ${(data.linkedinHeadline || data.linkedinAbout) ? `
+  </div>
+
+  <!-- DETAILED PROFILE PAGES -->
+  <div class="page page-1">
+    <div class="content-area">
+      
+      <!-- Personal Information Section -->
+      ${(data.summary && data.summary !== 'N/A' && data.summary.trim() !== '') || (data.headline && data.headline !== 'N/A' && data.headline.trim() !== '') || (data.education && data.education !== 'N/A' && data.education.trim() !== '') ? `
       <div class="section">
         <div class="section-header">
-          <div class="section-icon">💡</div>
-          <h2 class="section-title">Professional Summary</h2>
+          <div class="section-icon">👤</div>
+          <h2 class="section-title">Personal Information</h2>
         </div>
-        ${data.linkedinHeadline ? `
-          <div class="summary-box">
-            <div class="summary-text">${data.linkedinHeadline}</div>
-          </div>
+        
+        ${data.summary && data.summary !== 'N/A' && data.summary.trim() !== '' ? `
+        <div class="field-group">
+          <div class="field-label">📝 Summary</div>
+          <div class="field-value long-text">${data.summary}</div>
+        </div>
         ` : ''}
-        ${data.linkedinAbout ? `
-          <div class="summary-box">
-            <div class="summary-text">${data.linkedinAbout}</div>
-          </div>
+        
+        ${data.headline && data.headline !== 'N/A' && data.headline.trim() !== '' ? `
+        <div class="field-group">
+          <div class="field-label">💡 Headline</div>
+          <div class="field-value">${data.headline}</div>
+        </div>
+        ` : ''}
+        
+        ${data.education && data.education !== 'N/A' && data.education.trim() !== '' ? `
+        <div class="field-group">
+          <div class="field-label">🎓 Education</div>
+          <div class="field-value">${data.education}</div>
+        </div>
         ` : ''}
       </div>
       ` : ''}
       
-      ${(data.currentExperience || data.experience2 || data.experience3 || data.experience4) ? `
-      <div class="section">
-        <div class="section-header">
-          <div class="section-icon">💼</div>
-          <h2 class="section-title">Professional Experience</h2>
-        </div>
-        <div class="experience-timeline">
-          ${data.currentExperience ? `
-          <div class="experience-item">
-            <div class="experience-text">
-              ${data.currentExperience}
-              <span class="current-job-badge">Current Job</span>
+            <!-- Experiences Section -->
+            ${(data.currentExperience && data.currentExperience !== 'N/A' && data.currentExperience.trim() !== '') || (data.experience2 && data.experience2 !== 'N/A' && data.experience2.trim() !== '') || (data.experience3 && data.experience3 !== 'N/A' && data.experience3.trim() !== '') || (data.experience4 && data.experience4 !== 'N/A' && data.experience4.trim() !== '') ? `
+            <div class="section">
+              <div class="section-header">
+                <div class="section-icon">💼</div>
+                <h2 class="section-title">Professional Experience</h2>
+              </div>
+              <div class="experience-grid">
+                ${data.currentExperience && data.currentExperience !== 'N/A' && data.currentExperience.trim() !== '' ? `
+                <div class="experience-item current">
+                  <div class="experience-title">Current Experience</div>
+                  <div class="field-value">${data.currentExperience}</div>
+                </div>
+                ` : ''}
+                ${data.experience2 && data.experience2 !== 'N/A' && data.experience2.trim() !== '' ? `
+                <div class="experience-item">
+                  <div class="experience-title">Experience 2</div>
+                  <div class="field-value">${data.experience2}</div>
+                </div>
+                ` : ''}
+                ${data.experience3 && data.experience3 !== 'N/A' && data.experience3.trim() !== '' ? `
+                <div class="experience-item">
+                  <div class="experience-title">Experience 3</div>
+                  <div class="field-value">${data.experience3}</div>
+                </div>
+                ` : ''}
+                ${data.experience4 && data.experience4 !== 'N/A' && data.experience4.trim() !== '' ? `
+                <div class="experience-item">
+                  <div class="experience-title">Experience 4</div>
+                  <div class="field-value">${data.experience4}</div>
+                </div>
+                ` : ''}
+              </div>
             </div>
-          </div>
-          ` : ''}
-          ${data.experience2 ? `
-          <div class="experience-item">
-            <div class="experience-text">${data.experience2}</div>
-          </div>
-          ` : ''}
-          ${data.experience3 ? `
-          <div class="experience-item">
-            <div class="experience-text">${data.experience3}</div>
-          </div>
-          ` : ''}
-          ${data.experience4 ? `
-          <div class="experience-item">
-            <div class="experience-text">${data.experience4}</div>
-          </div>
-          ` : ''}
-        </div>
-      </div>
-      ` : ''}
+            ` : ''}
       
-      ${data.education ? `
-      <div class="section">
-        <div class="section-header">
-          <div class="section-icon">🎓</div>
-          <h2 class="section-title">Education</h2>
-        </div>
-        <div class="education-card">
-          <div class="education-text">${data.education}</div>
-        </div>
-      </div>
-      ` : ''}
-      
-      ${(data.email || data.mobile || data.secondPhone || data.linkedinUrl) ? `
-      <div class="section">
-        <div class="section-header">
-          <div class="section-icon">📞</div>
-          <h2 class="section-title">Contact Information</h2>
-        </div>
-        <div class="contact-grid">
-          ${data.email ? `
-          <div class="contact-card">
-            <div class="contact-label">📧 Email Address</div>
-            <div class="contact-value">${data.email}</div>
-          </div>
-          ` : ''}
-          ${data.mobile ? `
-          <div class="contact-card">
-            <div class="contact-label">📱 Mobile Phone</div>
-            <div class="contact-value">${data.mobile}</div>
-          </div>
-          ` : ''}
-          ${data.secondPhone ? `
-          <div class="contact-card">
-            <div class="contact-label">☎️ Second Phone</div>
-            <div class="contact-value">${data.secondPhone}</div>
-          </div>
-          ` : ''}
-          ${data.linkedinUrl ? `
-          <div class="contact-card">
-            <div class="contact-label">🔗 LinkedIn Profile</div>
-            <div class="contact-value">${data.linkedinUrl}</div>
-          </div>
-          ` : ''}
-        </div>
-      </div>
-      ` : ''}
-      
-      ${(data.lastPostPerson) ? `
+      <!-- Last Posts Section -->
+      ${(data.lastPostPerson1 && data.lastPostPerson1 !== 'N/A' && data.lastPostPerson1.trim() !== '') || (data.lastPostPerson2 && data.lastPostPerson2 !== 'N/A' && data.lastPostPerson2.trim() !== '') || (data.lastPostPerson3 && data.lastPostPerson3 !== 'N/A' && data.lastPostPerson3.trim() !== '') ? `
       <div class="section">
         <div class="section-header">
           <div class="section-icon">📝</div>
-          <h2 class="section-title">Recent Activity</h2>
+          <h2 class="section-title">Last Posts (Person)</h2>
         </div>
         <div class="posts-grid">
-          <div class="post-card">
-            <div class="post-label">💬 Latest Personal Post</div>
-            <div class="post-text">${data.lastPostPerson}</div>
+          ${data.lastPostPerson1 && data.lastPostPerson1 !== 'N/A' && data.lastPostPerson1.trim() !== '' ? `
+          <div class="post-item">
+            <div class="field-label">📝 Post 1</div>
+            <div class="field-value">${data.lastPostPerson1}</div>
+          </div>
+          ` : ''}
+          ${data.lastPostPerson2 && data.lastPostPerson2 !== 'N/A' && data.lastPostPerson2.trim() !== '' ? `
+          <div class="post-item">
+            <div class="field-label">📝 Post 2</div>
+            <div class="field-value">${data.lastPostPerson2}</div>
+          </div>
+          ` : ''}
+          ${data.lastPostPerson3 && data.lastPostPerson3 !== 'N/A' && data.lastPostPerson3.trim() !== '' ? `
+          <div class="post-item">
+            <div class="field-label">📝 Post 3</div>
+            <div class="field-value">${data.lastPostPerson3}</div>
+          </div>
+          ` : ''}
+        </div>
+      </div>
+      ` : ''}
+      
+      <!-- Contact Information Section -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">📧</div>
+          <h2 class="section-title">Contact Information</h2>
+        </div>
+        
+        ${data.personContactEmail && data.personContactEmail !== 'N/A' && data.personContactEmail.trim() !== '' ? `
+        <div class="field-group">
+          <div class="field-label">📧 Person Contact Email</div>
+          <div class="field-value">${data.personContactEmail}</div>
+        </div>
+        ` : ''}
+        
+        ${data.contactPhone && data.contactPhone !== 'N/A' && data.contactPhone.trim() !== '' ? `
+        <div class="field-group">
+          <div class="field-label">📱 Contact Phone</div>
+          <div class="field-value">${data.contactPhone}</div>
+        </div>
+        ` : ''}
+        
+        ${data.contactSecondPhone && data.contactSecondPhone !== 'N/A' && data.contactSecondPhone.trim() !== '' ? `
+        <div class="field-group">
+          <div class="field-label">☎️ Contact Second Phone</div>
+          <div class="field-value">${data.contactSecondPhone}</div>
+        </div>
+        ` : ''}
+        
+        ${data.contactLinkedIn && data.contactLinkedIn !== 'N/A' && data.contactLinkedIn.trim() !== '' ? `
+        <div class="field-group">
+          <div class="field-label">🔗 Contact LinkedIn</div>
+          <div class="field-value">${data.contactLinkedIn}</div>
+        </div>
+        ` : ''}
+        
+      </div>
+      
+    </div>
+  </div>
+  
+  <!-- COMPANY INFORMATION SECTION -->
+  <div class="page page-company">
+    <div class="content-area">
+      <!-- Company Card -->
+      ${(data.companyName && data.companyName !== 'N/A' && data.companyName.trim() !== '') || (data.companyLogoUrl && data.companyLogoUrl !== 'N/A' && data.companyLogoUrl.trim() !== '') ? `
+      <div class="company-card">
+        <div class="company-header">
+          ${data.companyLogoUrl && data.companyLogoUrl !== 'N/A' && data.companyLogoUrl.trim() !== '' ? `
+            <img src="${data.companyLogoUrl}" alt="${data.companyName}" class="company-logo" />
+          ` : ''}
+          <div class="company-info">
+            ${data.companyName ? `<div class="company-name-large">${data.companyName}</div>` : ''}
+            ${data.companyTagline ? `<div class="company-tagline-large">${data.companyTagline}</div>` : ''}
           </div>
         </div>
       </div>
       ` : ''}
-    </div>
-    
-    <div class="page-footer">
-      ${data.firstName} ${data.lastName} • Personal Profile • Page 1 of ${totalPages}
+
+      <!-- Company Information Section -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">🏢</div>
+          <h2 class="section-title">Company Information</h2>
+        </div>
+        
+        
+        ${data.companyWebsite && data.companyWebsite !== 'N/A' && data.companyWebsite.trim() !== '' ? `
+        <div class="field-group">
+          <div class="field-label">🌐 Company Website</div>
+          <div class="field-value">${data.companyWebsite}</div>
+        </div>
+        ` : ''}
+        
+        ${data.companyTagline && data.companyTagline !== 'N/A' && data.companyTagline.trim() !== '' ? `
+        <div class="field-group">
+          <div class="field-label">💬 Company Tagline</div>
+          <div class="field-value">${data.companyTagline}</div>
+        </div>
+        ` : ''}
+        
+        ${data.companyAbout && data.companyAbout !== 'N/A' && data.companyAbout.trim() !== '' ? `
+        <div class="field-group">
+          <div class="field-label">📋 Company About</div>
+          <div class="field-value long-text">${data.companyAbout}</div>
+        </div>
+        ` : ''}
+        
+        ${data.companyWebsiteBrief && data.companyWebsiteBrief !== 'N/A' && data.companyWebsiteBrief.trim() !== '' ? `
+        <div class="field-group">
+          <div class="field-label">📄 Company Information Brief</div>
+          <div class="field-value long-text">${data.companyWebsiteBrief}</div>
+        </div>
+        ` : ''}
+        
+        ${data.contactCorporatePhone && data.contactCorporatePhone !== 'N/A' && data.contactCorporatePhone.trim() !== '' ? `
+        <div class="field-group">
+          <div class="field-label">📞 Contact Corporate Phone</div>
+          <div class="field-value">${data.contactCorporatePhone}</div>
+        </div>
+        ` : ''}
+        
+        ${data.companyIndustry && data.companyIndustry !== 'N/A' && data.companyIndustry.trim() !== '' ? `
+        <div class="field-group">
+          <div class="field-label">🏭 Company Industry</div>
+          <div class="field-value">${data.companyIndustry}</div>
+        </div>
+        ` : ''}
+        
+      </div>
+      
+            <!-- Partners Section -->
+            ${data.companyPartners && data.companyPartners !== 'N/A' && data.companyPartners.trim() !== '' ? `
+            <div class="section">
+              <div class="section-header">
+                <div class="section-icon">🤝</div>
+                <h2 class="section-title">Partners</h2>
+              </div>
+              <div class="field-group">
+                <div class="field-label">🤝 Company Partners</div>
+                <ul class="bullet-list">
+                  ${data.companyPartners.split(';').map(partner => `<li>${partner.trim()}</li>`).join('')}
+                </ul>
+              </div>
+            </div>
+            ` : ''}
+      
+            <!-- Last Events Section -->
+            ${data.companyLastEvents && data.companyLastEvents !== 'N/A' && data.companyLastEvents.trim() !== '' ? `
+            <div class="section">
+              <div class="section-header">
+                <div class="section-icon">📅</div>
+                <h2 class="section-title">Last Events</h2>
+              </div>
+              <div class="field-group">
+                <div class="field-label">📅 Company Last Events</div>
+                <div class="field-value long-text">${data.companyLastEvents}</div>
+              </div>
+            </div>
+            ` : ''}
+      
+      <!-- Company Location Section -->
+      ${data.companyAddress && data.companyAddress !== 'N/A' && data.companyAddress.trim() !== '' ? `
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">📍</div>
+          <h2 class="section-title">Company Location</h2>
+        </div>
+        
+        <div class="field-group">
+          <div class="field-label">🏠 Company Address</div>
+          <div class="field-value">${data.companyAddress}</div>
+        </div>
+      </div>
+      ` : ''}
+      
+      <!-- Company Last Posts Section -->
+      ${(data.companyLastPost1 && data.companyLastPost1 !== 'N/A' && data.companyLastPost1.trim() !== '') || (data.companyLastPost2 && data.companyLastPost2 !== 'N/A' && data.companyLastPost2.trim() !== '') || (data.companyLastPost3 && data.companyLastPost3 !== 'N/A' && data.companyLastPost3.trim() !== '') ? `
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">💬</div>
+          <h2 class="section-title">Company Last Posts</h2>
+        </div>
+        <div class="posts-grid">
+          ${data.companyLastPost1 && data.companyLastPost1 !== 'N/A' && data.companyLastPost1.trim() !== '' ? `
+          <div class="post-item">
+            <div class="field-label">💬 Company Post 1</div>
+            <div class="field-value long-text">${data.companyLastPost1}</div>
+          </div>
+          ` : ''}
+          ${data.companyLastPost2 && data.companyLastPost2 !== 'N/A' && data.companyLastPost2.trim() !== '' ? `
+          <div class="post-item">
+            <div class="field-label">💬 Company Post 2</div>
+            <div class="field-value long-text">${data.companyLastPost2}</div>
+          </div>
+          ` : ''}
+          ${data.companyLastPost3 && data.companyLastPost3 !== 'N/A' && data.companyLastPost3.trim() !== '' ? `
+          <div class="post-item">
+            <div class="field-label">💬 Company Post 3</div>
+            <div class="field-value long-text">${data.companyLastPost3}</div>
+          </div>
+          ` : ''}
+        </div>
+      </div>
+      ` : ''}
+      
     </div>
   </div>
-  
-  <!-- COMPANY PROFILE PAGE(S) -->
-  ${hasCompanyInfo ? `
-  <div class="page page-company">
-    <div class="company-hero">
-      <div class="company-hero-content">
-        ${data.companyLogoUrl ? `
-        <div class="company-logo">
-          <img src="${data.companyLogoUrl}" alt="${data.company} Logo" onerror="this.parentElement.innerHTML='<div class=company-logo-placeholder>${data.company.charAt(0)}</div>'">
-        </div>
-        ` : (data.company ? `
-        <div class="company-logo">
-          <div class="company-logo-placeholder">${data.company.charAt(0)}</div>
-        </div>
-        ` : '')}
-        <div class="company-info-section">
-          <div class="company-badge">Company Profile</div>
-          ${data.company ? `<h1 class="company-name">${data.company}</h1>` : ''}
-          ${data.companyHeadline ? `<div class="company-tagline">${data.companyHeadline}</div>` : ''}
-          ${data.websiteBrief ? `<div class="company-tagline">${data.websiteBrief}</div>` : ''}
-          ${data.industry ? `<div class="company-industry"><span>🏭</span> ${data.industry}</div>` : ''}
-        </div>
-      </div>
-    </div>
-    
-    <div class="company-content">
-      ${data.companyAbout ? `
-      <div class="info-card">
-        <div class="info-card-header">
-          <div class="info-card-icon">📋</div>
-          <h3 class="info-card-title">About the Company</h3>
-        </div>
-        <div class="info-card-text">${data.companyAbout}</div>
-      </div>
-      ` : ''}
-      
-      ${(data.address || data.city || data.state || data.country) ? `
-      <div class="location-card">
-        <div class="location-header">
-          <div class="location-icon">📍</div>
-          <h3 class="location-title">Company Location</h3>
-        </div>
-        <div class="location-text">
-          ${data.address ? `${data.address}<br>` : ''}
-          ${data.city}${data.state ? `, ${data.state}` : ''}${data.country ? ` • ${data.country}` : ''}
-        </div>
-      </div>
-      ` : ''}
-      
-      ${(data.email || data.corporatePhone || data.currentExperience) ? `
-      <div class="stats-grid" style="margin-top: 20px;">
-        ${data.email ? `
-        <div class="stat-card">
-          <div class="stat-icon">📧</div>
-          <div class="stat-label">Contact Email</div>
-          <div class="stat-value">${data.email}</div>
-        </div>
-        ` : ''}
-        ${data.corporatePhone ? `
-        <div class="stat-card">
-          <div class="stat-icon">📞</div>
-          <div class="stat-label">Phone</div>
-          <div class="stat-value">${data.corporatePhone}</div>
-        </div>
-        ` : ''}
-        ${data.currentExperience ? `
-        <div class="stat-card">
-          <div class="stat-icon">💼</div>
-          <div class="stat-label">Primary Contact</div>
-          <div class="stat-value">${data.firstName} ${data.lastName}</div>
-        </div>
-        ` : ''}
-      </div>
-      ` : ''}
-      
-      ${data.lastPostCompany ? `
-      <div class="info-card" style="margin-top: 20px; border-left-color: #10b981;">
-        <div class="info-card-header">
-          <div class="info-card-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">💬</div>
-          <h3 class="info-card-title">Latest Company Update</h3>
-        </div>
-        <div class="info-card-text" style="font-style: italic;">${data.lastPostCompany}</div>
-      </div>
-      ` : ''}
-    </div>
-    
-    <div class="page-footer">
-      ${data.firstName} ${data.lastName} • Company Profile • Page ${totalPages} of ${totalPages}
-    </div>
-  </div>
-  ` : ''}
 </body>
 </html>
   `;
 };
 
 
+
+// Generate a single profile PDF with all fields
+const generateProfilePDF = async (data) => {
+  console.log('🚀 Generating comprehensive profile PDF...\n');
+  
+  const browser = await puppeteer.launch({ 
+    headless: 'new',
+    args: [
+      '--no-sandbox', 
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--disable-gpu'
+    ]
+  });
+  
+  try {
+    const html = generateHTML(data);
+    const page = await browser.newPage();
+    
+    await page.setDefaultTimeout(30000);
+    
+    await page.setContent(html, { 
+      waitUntil: 'networkidle0', 
+      timeout: 15000 
+    });
+    
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    await page.pdf({
+      ...CONFIG.pdfOptions,
+      path: path.join(CONFIG.outputDir, 'profile.pdf'),
+      timeout: 20000,
+      preferCSSPageSize: false
+    });
+    
+    await page.close();
+    console.log(`   ✓ Success - Comprehensive profile with all fields generated`);
+  } catch (error) {
+    console.log(`   ✗ Error: ${error.message}`);
+  } finally {
+    await browser.close();
+  }
+};
 
 // Generate PDFs for all contacts
 const generatePDFs = async (contacts) => {
@@ -1119,20 +1814,17 @@ const generatePDFs = async (contacts) => {
   
   for (let i = 0; i < contacts.length; i++) {
     const user = contacts[i];
-    const firstName = getField(user, 'First Name', 'first_name');
-    const lastName = getField(user, 'Last Name', 'last_name');
+    const fullName = getField(user, 'Full Name');
     
-    // Check if both First Name and Last Name are empty
-    if (!firstName && !lastName) {
+    // Check if Full Name is empty
+    if (!fullName) {
       skippedCount++;
-      console.log(`⏭️  [${i + 1}/${contacts.length}] Skipping - Both First Name and Last Name are empty`);
+      console.log(`⏭️  [${i + 1}/${contacts.length}] Skipping - Full Name is empty`);
       continue;
     }
     
-    // Use fallback names if one is missing
-    const displayFirstName = firstName || 'User';
-    const displayLastName = lastName || '';
-    const filename = `${displayFirstName}_${displayLastName}_Profile.pdf`.replace(/\s+/g, '_').replace(/_+/g, '_');
+    // Use Full Name for filename
+    const filename = `${fullName}_Profile.pdf`.replace(/\s+/g, '_').replace(/_+/g, '_');
     
     console.log(`📄 [${i + 1}/${contacts.length}] Generating: ${filename}`);
     
@@ -1188,9 +1880,64 @@ const generatePDFs = async (contacts) => {
   try {
     setupOutputDir();
     const contacts = loadContacts();
+    
+    // Generate comprehensive profile PDF for first contact
+    if (contacts.length > 0) {
+      const firstContact = contacts[0];
+      const data = {
+        // Personal Information - New CSV Schema Mapping
+        fullName: getField(firstContact, 'Full Name'),
+        contactPhotoUrl: getField(firstContact, 'Contact Photo URL'),
+        title: getField(firstContact, 'Person Title'),
+        personState: getField(firstContact, 'Person State'),
+        personCountry: getField(firstContact, 'Person Country'),
+        summary: getField(firstContact, 'Summary About The Person'),
+        headline: getField(firstContact, 'Person Headline'),
+        education: getField(firstContact, 'Education'),
+        currentExperience: getField(firstContact, 'Current Experience'),
+        experience2: getField(firstContact, 'Experience 2'),
+        experience3: getField(firstContact, 'Experience 3'),
+        experience4: getField(firstContact, 'Experience 4'),
+        lastPostPerson1: getField(firstContact, 'Last Post For Person'),
+        lastPostPerson2: getField(firstContact, 'Last Post For Person 2'),
+        lastPostPerson3: getField(firstContact, 'Last Post For Person 3'),
+        personContactEmail: getField(firstContact, 'Person Contact Email'),
+        contactPhone: getField(firstContact, 'Contact Phone'),
+        contactSecondPhone: getField(firstContact, 'Contact Second Phone'),
+        contactLinkedIn: getField(firstContact, 'Contact LinkedIn'),
+        
+        // Company Information - New CSV Schema Mapping
+        companyName: getField(firstContact, 'Company Name'),
+        companyLogoUrl: getField(firstContact, 'Company Logo URL'),
+        companyWebsite: getField(firstContact, 'Company Website'),
+        companyTagline: getField(firstContact, 'Company Tagline'),
+        companyAbout: getField(firstContact, 'Company About'),
+        companyIndustry: getField(firstContact, 'Company Industry'),
+        companyWebsiteBrief: getField(firstContact, 'Company information Brief'),
+        companyPartners: getField(firstContact, 'Company Partners'),
+        companyLastEvents: getField(firstContact, 'Company Last Events'),
+        companyLastPost1: getField(firstContact, 'Company Last Post'),
+        companyLastPost2: getField(firstContact, 'Company Last Post 2'),
+        companyLastPost3: getField(firstContact, 'Company Last Post 3'),
+        contactCorporatePhone: getField(firstContact, 'Contact Corporate Phone'),
+        companyAddress: getField(firstContact, 'Company Address'),
+        companyCity: getField(firstContact, 'Company City'),
+        companyState: getField(firstContact, 'Company State'),
+        companyCountry: getField(firstContact, 'Company Country'),
+        
+        // Helper fields
+        firstName: getField(firstContact, 'Full Name').split(' ')[0] || '',
+        lastName: getField(firstContact, 'Full Name').split(' ').slice(1).join(' ') || ''
+      };
+      
+      await generateProfilePDF(data);
+    }
+    
+    // Also generate individual PDFs for all contacts
     await generatePDFs(contacts);
   } catch (error) {
     console.error('❌ Fatal error:', error.message);
     process.exit(1);
   }
 })();
+

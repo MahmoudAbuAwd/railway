@@ -1,16 +1,30 @@
 {
-  "name": "style",
+  "name": "csv-to-pdf-generator",
   "version": "1.0.0",
+  "description": "A modern web application that generates professional profile PDFs from CSV data via API integration",
   "main": "pdf_generator.js",
   "scripts": {
+    "generate": "node pdf_generator.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "pdf",
+    "csv",
+    "generator",
+    "profiles",
+    "n8n",
+    "webhook",
+    "automation"
+  ],
   "author": "",
-  "license": "ISC",
-  "description": "",
+  "license": "MIT",
   "dependencies": {
     "papaparse": "^5.5.3",
     "puppeteer": "^24.22.3"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/csv-to-pdf-generator.git"
+  },
+  "homepage": "https://YOUR_USERNAME.github.io/csv-to-pdf-generator/"
 }
