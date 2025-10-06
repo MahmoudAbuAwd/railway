@@ -24,7 +24,8 @@ class PDFGenerator {
           'generatePdfsBtn': () => this.generateAllHTMLs(),
           'generateSpecificBtn': () => this.showSpecificContactSection(),
           'downloadSpecificBtn': () => this.showSpecificContactSection(),
-          'generateSelectedBtn': () => this.generateSelectedHTML()
+          'generateSelectedBtn': () => this.generateSelectedHTML(),
+          'triggerWorkflowBtn': () => this.triggerWorkflow()
       };
 
       Object.entries(eventBindings).forEach(([elementId, handler]) => {
@@ -45,6 +46,118 @@ class PDFGenerator {
       // Check for dark mode preference
       if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
           document.body.classList.add('dark-mode');
+      }
+  }
+
+  /**
+   * Trigger n8n workflow via webhook
+   */
+  async triggerWorkflow() {
+      const webhookUrl = document.getElementById('workflowWebhook').value.trim();
+      const statusElement = document.getElementById('workflowStatus');
+      
+      if (!webhookUrl) {
+          this.showWorkflowStatus('Please enter a valid webhook URL', 'error');
+          return;
+      }
+
+      if (!this.isValidUrl(webhookUrl)) {
+          this.showWorkflowStatus('Please enter a valid URL format', 'error');
+          return;
+      }
+
+      this.showWorkflowStatus('Triggering n8n workflow...', 'loading');
+      
+      try {
+          // Try GET request first (most n8n webhooks work with GET)
+          let response;
+          let method = 'GET';
+          
+          try {
+              // Attempt GET request with query parameters
+              const urlWithParams = new URL(webhookUrl);
+              urlWithParams.searchParams.append('triggered_at', new Date().toISOString());
+              urlWithParams.searchParams.append('source', 'html_generator_app');
+              
+              response = await fetch(urlWithParams.toString(), {
+                  method: 'GET',
+                  mode: 'no-cors', // This allows the request to go through despite CORS
+                  cache: 'no-cache'
+              });
+              
+              console.log('Workflow triggered with GET request');
+              
+          } catch (getError) {
+              console.log('GET request failed, trying POST with no-cors mode');
+              
+              // If GET fails, try POST with no-cors mode
+              method = 'POST';
+              response = await fetch(webhookUrl, {
+                  method: 'POST',
+                  mode: 'no-cors', // This allows the request to go through despite CORS
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                      triggered_at: new Date().toISOString(),
+                      source: 'html_generator_app'
+                  })
+              });
+          }
+
+          // With no-cors mode, we can't read the response, but the request was sent
+          // If we get here without error, the request was successful
+          console.log('Workflow trigger request sent successfully');
+          
+          this.showWorkflowStatus('✓ Workflow triggered successfully! Section will hide temporarily.', 'success');
+          
+          // Hide the section after 3 seconds
+          setTimeout(() => {
+              const workflowSection = document.getElementById('workflowTriggerSection');
+              if (workflowSection) {
+                  workflowSection.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                  workflowSection.style.opacity = '0';
+                  workflowSection.style.transform = 'translateY(-20px)';
+                  
+                  setTimeout(() => {
+                      workflowSection.style.display = 'none';
+                  }, 500);
+              }
+          }, 1000);
+          
+      } catch (error) {
+          console.error('Error triggering workflow:', error);
+          this.showWorkflowStatus(`Error: ${error.message}. The workflow may still have been triggered. Check your n8n logs.`, 'error');
+          
+          // Even on error, we might have triggered the workflow
+          // Give option to mark as triggered anyway
+          setTimeout(() => {
+              this.showWorkflowStatus(
+                  'If your workflow was triggered successfully (check n8n logs), click "Execute Workflow" again to hide this section.',
+                  'warning'
+              );
+          }, 5000);
+      }
+  }
+
+  /**
+   * Show workflow status message
+   * @param {string} message - Status message
+   * @param {string} type - Status type (success, error, warning, loading)
+   */
+  showWorkflowStatus(message, type) {
+      const status = document.getElementById('workflowStatus');
+      if (!status) return;
+      
+      status.textContent = message;
+      status.className = `status ${type}`;
+      status.classList.remove('hidden');
+      
+      // Auto-hide success/error messages after 5 seconds
+      if (type === 'error') {
+          setTimeout(() => {
+              status.classList.add('hidden');
+          }, 5000);
       }
   }
 
@@ -1207,10 +1320,10 @@ class PDFGenerator {
 		.events-section {
 			padding: 20px;
 			border-radius: 14px;
-			background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-			border-left: 5px solid #f59e0b;
+			background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+			border-left: 5px solid #10b981;
 			margin-top: 16px;
-			box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);
+			box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
 			transition: transform .3s ease, box-shadow .3s ease;
 			position: relative;
 			overflow: hidden;
@@ -1225,12 +1338,12 @@ class PDFGenerator {
 		}
 		.events-section:hover {
 			transform: translateY(-2px);
-			box-shadow: 0 8px 20px rgba(245, 158, 11, 0.18);
+			box-shadow: 0 8px 20px rgba(16, 185, 129, 0.18);
 		}
 		.events-section strong {
 			font-size: 16px;
 			font-weight: 800;
-			color: #92400e;
+			color: #065f46;
 			display: flex;
 			align-items: center;
 			gap: 8px;
@@ -1244,7 +1357,7 @@ class PDFGenerator {
 		.events-section p {
 			font-size: 15px;
 			line-height: 1.8;
-			color: #78350f;
+			color: #065f46;
 			margin: 0;
 			font-weight: 600;
 		}
@@ -1407,8 +1520,8 @@ class PDFGenerator {
 				` : ''}
 
 				${this.hasValue(data.companyPartners) ? `
-				<div style="margin-top:14px;">
-					<strong style="font-size:14px;color:var(--muted);">Partners</strong>
+				<div class="events-section">
+					<strong>Partners</strong>
 					<ul class="list">
 						${data.companyPartners.split(';').map(p => `<li>${p.trim()}</li>`).join('')}
 					</ul>

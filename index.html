@@ -803,6 +803,30 @@
                     Connect your data source and create professional HTML pages in seconds
                 </p>
             </div>
+
+            <!-- n8n Workflow Trigger Section -->
+            <div class="api-section" id="workflowTriggerSection">
+                <h2><i class="fas fa-bolt"></i> Trigger n8n Workflow</h2>
+                <p style="color: var(--text-muted); margin-bottom: 1rem;">
+                    Start your n8n workflow to collect and process data. You can run this anytime.
+                </p>
+                <div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 0.75rem; padding: 1rem; margin-bottom: 1.5rem;">
+                    <p style="color: #92400e; font-size: 0.875rem; margin: 0; line-height: 1.6;">
+                        <strong>💡 Tip:</strong> Make sure your n8n webhook is set to "GET" or "POST" method. 
+                        If you see an error, check your n8n execution logs - the workflow might still be triggered successfully!
+                    </p>
+                </div>
+                <div class="form-group">
+                    <label for="workflowWebhook">
+                        <i class="fas fa-plug"></i> n8n Workflow Webhook URL
+                    </label>
+                    <input type="url" id="workflowWebhook" placeholder="https://your-n8n-instance.com/webhook/trigger-workflow" />
+                </div>
+                <button class="btn btn-warning" id="triggerWorkflowBtn">
+                    <i class="fas fa-rocket"></i> Execute Workflow
+                </button>
+                <div id="workflowStatus" class="hidden"></div>
+            </div>
             
             <div class="api-section">
                 <h2><i class="fas fa-link"></i> API Configuration</h2>
