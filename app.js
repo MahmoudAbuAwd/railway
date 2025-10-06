@@ -1411,7 +1411,13 @@ class PDFGenerator {
 				</div>
 				<div class="hero-meta">
 					<h1>${data.fullName}</h1>
-					${this.hasValue(data.title) ? `<div class="role">${data.title}</div>` : ''}
+					${this.hasValue(data.title, data.companyName) ? `
+					<div class="role" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-start;">
+						${this.hasValue(data.title) ? `<span style="color: var(--muted);">${data.title}</span>` : ''}
+						${this.hasValue(data.title, data.companyName) ? `<span style="color: var(--muted);">•</span>` : ''}
+						${this.hasValue(data.companyName) ? `<span style="color: #10b981; font-weight: 700;">🏢 ${data.companyName}</span>` : ''}
+					</div>
+					` : ''}
 					<div class="hero-actions">
 						${this.hasValue(data.personState, data.personCountry) ? `<span class="pill">📍 ${[data.personState, data.personCountry].filter(Boolean).join(', ')}</span>` : ''}
 						${this.hasValue(data.education) ? `<span class="pill">🎓 ${data.education}</span>` : ''}
@@ -1421,13 +1427,13 @@ class PDFGenerator {
 		</section>
 
 		<!-- USER INFORMATION SECTION -->
-		<div class="section-title"><span class="bar"></span><span>User Information</span></div>
+		<div class="section-title"><span class="bar"></span><span>Lead Information</span></div>
 
 		<div class="grid">
 			<section class="card">
 				<div class="card-headline">
 					<span class="icon">👤</span>
-					User Profile
+					Lead Profile
 				</div>
 
 				${this.hasValue(data.summary) ? `
@@ -1453,16 +1459,16 @@ class PDFGenerator {
 
 				${this.hasValue(data.currentExperience, data.experience2, data.experience3, data.experience4) ? `
 				<div class="experience-grid">
-					${this.hasValue(data.currentExperience) ? `<div class="xp current"><div class="xp-label">Current Experience</div>${data.currentExperience}</div>` : ''}
-					${this.hasValue(data.experience2) ? `<div class="xp"><div class="xp-label">Previous Experience</div>${data.experience2}</div>` : ''}
-					${this.hasValue(data.experience3) ? `<div class="xp"><div class="xp-label">Previous Experience</div>${data.experience3}</div>` : ''}
-					${this.hasValue(data.experience4) ? `<div class="xp"><div class="xp-label">Previous Experience</div>${data.experience4}</div>` : ''}
+					${this.hasValue(data.currentExperience) ? `<div class="xp current"><div class="xp-label">Current Job</div>${data.currentExperience}</div>` : ''}
+					${this.hasValue(data.experience2) ? `<div class="xp"><div class="xp-label">Previous Job</div>${data.experience2}</div>` : ''}
+					${this.hasValue(data.experience3) ? `<div class="xp"><div class="xp-label">Previous Job</div>${data.experience3}</div>` : ''}
+					${this.hasValue(data.experience4) ? `<div class="xp"><div class="xp-label">Previous Job</div>${data.experience4}</div>` : ''}
 				</div>
 				` : ''}
 
 				${this.hasValue(data.lastPostPerson1, data.lastPostPerson2, data.lastPostPerson3) ? `
 				<div style="margin-top:20px;">
-					<strong style="font-size:16px;color:var(--text);font-family:Poppins,Inter,sans-serif;display:block;margin-bottom:4px;">LinkedIn Activity</strong>
+					<strong style="font-size:16px;color:var(--text);font-family:Poppins,Inter,sans-serif;display:block;margin-bottom:4px;">LinkedIn Posts</strong>
 					<div class="posts-grid">
 						${this.hasValue(data.lastPostPerson1) ? `<div class="post"><span class="post-label">📌 LinkedIn Post #1</span>${data.lastPostPerson1}</div>` : ''}
 						${this.hasValue(data.lastPostPerson2) ? `<div class="post"><span class="post-label">📌 LinkedIn Post #2</span>${data.lastPostPerson2}</div>` : ''}
@@ -1531,13 +1537,15 @@ class PDFGenerator {
 				${this.hasValue(data.companyLastEvents) ? `
 				<div class="events-section">
 					<strong>Recent Events</strong>
-					<p>${data.companyLastEvents}</p>
+					<ul class="list">
+						${data.companyLastEvents.split(';').map(event => `<li>${event.trim()}</li>`).join('')}
+					</ul>
 				</div>
 				` : ''}
 
 				${this.hasValue(data.companyLastPost1, data.companyLastPost2, data.companyLastPost3) ? `
 				<div style="margin-top:20px;">
-					<strong style="font-size:16px;color:var(--text);font-family:Poppins,Inter,sans-serif;display:block;margin-bottom:4px;">Company LinkedIn Activity</strong>
+					<strong style="font-size:16px;color:var(--text);font-family:Poppins,Inter,sans-serif;display:block;margin-bottom:4px;">Company LinkedIn Posts</strong>
 					<div class="posts-grid">
 						${this.hasValue(data.companyLastPost1) ? `<div class="post"><span class="post-label">🏢 Company LinkedIn Post #1</span>${data.companyLastPost1}</div>` : ''}
 						${this.hasValue(data.companyLastPost2) ? `<div class="post"><span class="post-label">🏢 Company LinkedIn Post #2</span>${data.companyLastPost2}</div>` : ''}
@@ -1549,7 +1557,7 @@ class PDFGenerator {
 		</div>
 		` : ''}
 
-		<div class="footer">Built with care — accessible, responsive, and elegant.</div>
+		<div class="footer">Build With Kawkab AI</div>
 	</div>
 </body>
 </html>
