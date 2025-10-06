@@ -557,18 +557,36 @@ class PDFGenerator {
   }
 
   /**
-   * Generate filename for PDF
+   * Generate filename for HTML
    * @param {Object} contact - Contact data
-   * @returns {string} Sanitized filename
+   * @returns {string} Sanitized filename in format firstname-lastname.html
    */
   generateHTMLFilename(contact) {
       const fullName = this.getField(contact, 'Full Name', 'fullName', 'name') || 'Unknown';
-      const sanitized = fullName
-          .replace(/[^a-z0-9]/gi, '_')
-          .replace(/_{2,}/g, '_')
-          .toLowerCase();
-      const timestamp = new Date().getTime();
-      return `${sanitized}_profile_${timestamp}.html`;
+      
+      // Split the name into parts
+      const nameParts = fullName.trim().split(/\s+/);
+      
+      let filename;
+      if (nameParts.length >= 2) {
+          // If we have at least first and last name
+          const firstName = nameParts[0].toLowerCase();
+          const lastName = nameParts[nameParts.length - 1].toLowerCase();
+          filename = `${firstName}-${lastName}`;
+      } else if (nameParts.length === 1) {
+          // If only one name provided
+          filename = nameParts[0].toLowerCase();
+      } else {
+          filename = 'unknown';
+      }
+      
+      // Remove any special characters and ensure only letters and hyphens
+      filename = filename
+          .replace(/[^a-z0-9-]/gi, '')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+      
+      return `${filename}.html`;
   }
 
   /**
