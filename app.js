@@ -647,6 +647,7 @@ class PDFGenerator {
           companyName: this.getField(contact, 'Company Name', 'company', 'companyName'),
           companyLogoUrl: this.getField(contact, 'Company Logo URL', 'companyLogoUrl'),
           companyWebsite: this.getField(contact, 'Company Website', 'companyWebsite'),
+          companyLinkedIn: this.getField(contact, 'Company Linkedin', 'companyLinkedIn', 'companyLinkedin', 'Company LinkedIn'),
           companyTagline: this.getField(contact, 'Company Tagline', 'companyTagline', 'companyHeadline'),
           companyAbout: this.getField(contact, 'Company About', 'companyAbout'),
           companyIndustry: this.getField(contact, 'Company Industry', 'industry', 'companyIndustry'),
@@ -1522,6 +1523,7 @@ class PDFGenerator {
 
 				<div class="kv">
 					${this.hasValue(data.companyWebsite) ? `<div class="k">Website</div><div class="v"><a href="${data.companyWebsite}" target="_blank" rel="noopener">${data.companyWebsite}</a></div>` : ''}
+					${this.hasValue(data.companyLinkedIn) ? `<div class="k">LinkedIn</div><div class="v"><a href="${data.companyLinkedIn}" target="_blank" rel="noopener" style="color: #0a66c2;">🔗 View Company Profile</a></div>` : ''}
 					${this.hasValue(data.companyIndustry) ? `<div class="k">Industry</div><div class="v">${data.companyIndustry}</div>` : ''}
 					${this.hasValue(data.contactCorporatePhone) ? `<div class="k">Phone</div><div class="v">${data.contactCorporatePhone}</div>` : ''}
 					${this.hasValue(data.companyAddress) ? `<div class="k">Address</div><div class="v">${data.companyAddress}</div>` : ''}
