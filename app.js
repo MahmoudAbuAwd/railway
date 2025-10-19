@@ -661,7 +661,14 @@ class PDFGenerator {
           companyAddress: this.getField(contact, 'Company Address', 'address', 'companyAddress'),
           companyCity: this.getField(contact, 'Company City', 'city', 'companyCity'),
           companyState: this.getField(contact, 'Company State', 'state', 'companyState'),
-          companyCountry: this.getField(contact, 'Company Country', 'country', 'companyCountry')
+          companyCountry: this.getField(contact, 'Company Country', 'country', 'companyCountry'),
+          
+          // Marketing Manager Information
+          marketingManagerName: this.getField(contact, 'Marketing Manager Name', 'marketingManagerName'),
+          marketingManagerHeadline: this.getField(contact, 'Marketing Manager Headline', 'marketingManagerHeadline'),
+          marketingManagerEmail: this.getField(contact, 'Marketing Manager Email', 'marketingManagerEmail'),
+          marketingManagerLinkedin: this.getField(contact, 'Marketing Manager Linkedin', 'marketingManagerLinkedin'),
+          marketingManagerPicture: this.getField(contact, 'Marketing Manager Picture', 'marketingManagerPicture')
       };
   }
 
@@ -1560,6 +1567,33 @@ class PDFGenerator {
 					<ul class="list">
 						${data.companyLastEvents.split(';').map(event => `<li>${event.trim()}</li>`).join('')}
 					</ul>
+				</div>
+				` : ''}
+
+				${this.hasValue(data.marketingManagerName, data.marketingManagerHeadline, data.marketingManagerEmail, data.marketingManagerLinkedin, data.marketingManagerPicture) ? `
+				<div style="background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%); border-radius: 14px; padding: 20px; margin-top: 20px; border-left: 5px solid #f97316; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.1);">
+					<strong style="font-size: 18px; font-weight: 800; color: #9a3412; display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-family: Poppins, Inter, sans-serif;">
+						👤 Marketing Department
+					</strong>
+					<div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+						${this.hasValue(data.marketingManagerPicture) ? `
+						<div style="width: 80px; height: 80px; border-radius: 12px; overflow: hidden; border: 3px solid #f97316; flex-shrink: 0;">
+							<img src="${data.marketingManagerPicture}" alt="${data.marketingManagerName || 'Marketing Manager'}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.parentElement.innerHTML='<div style=\\'width:100%;height:100%;background:linear-gradient(135deg,#f97316,#ea580c);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:white;\\'>${data.marketingManagerName ? data.marketingManagerName.charAt(0).toUpperCase() : '?'}</div>'">
+						</div>
+						` : data.marketingManagerName ? `
+						<div style="width: 80px; height: 80px; border-radius: 12px; background: linear-gradient(135deg, #f97316, #ea580c); display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; color: white; flex-shrink: 0; border: 3px solid #f97316;">
+							${data.marketingManagerName.charAt(0).toUpperCase()}
+						</div>
+						` : ''}
+						<div style="flex: 1; min-width: 200px;">
+							${this.hasValue(data.marketingManagerName) ? `<div style="font-size: 20px; font-weight: 700; color: #9a3412; margin-bottom: 4px;">${data.marketingManagerName}</div>` : ''}
+							${this.hasValue(data.marketingManagerHeadline) ? `<div style="font-size: 14px; color: #c2410c; margin-bottom: 8px;">${data.marketingManagerHeadline}</div>` : ''}
+							<div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px;">
+								${this.hasValue(data.marketingManagerEmail) ? `<a href="mailto:${data.marketingManagerEmail}" style="font-size: 13px; color: #f97316; font-weight: 600; text-decoration: none; border-bottom: 1px dashed #f97316; padding: 2px 4px; border-radius: 4px;">📧 ${data.marketingManagerEmail}</a>` : ''}
+								${this.hasValue(data.marketingManagerLinkedin) ? `<a href="${data.marketingManagerLinkedin}" target="_blank" rel="noopener" style="font-size: 13px; color: #f97316; font-weight: 600; text-decoration: none; border-bottom: 1px dashed #f97316; padding: 2px 4px; border-radius: 4px;">🔗 LinkedIn</a>` : ''}
+							</div>
+						</div>
+					</div>
 				</div>
 				` : ''}
 
